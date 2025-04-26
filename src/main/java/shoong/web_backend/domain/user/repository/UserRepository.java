@@ -1,0 +1,1 @@
+package shoong.web_backend.domain.user.repository;// example
