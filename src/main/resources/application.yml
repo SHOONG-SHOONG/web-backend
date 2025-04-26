@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:mysql://**************:3306/shoong?serverTimezone=Asia/Seoul
+    username: shoong
+    password: shoong
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # 개발 시에는 update, 운영 배포 시에는 validate 추천
+    show-sql: true        # 콘솔에 SQL 찍힘
+    properties:
+      hibernate:
+        format_sql: true  # SQL 보기 좋게 정렬
+    database-platform: org.hibernate.dialect.MySQL8Dialect  # MySQL8 기준
