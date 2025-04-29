@@ -9,6 +9,7 @@ import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.orders.entity.Orders;
 import shoong.web_backend.domain.orders.repository.OrdersRepository;
+import shoong.web_backend.domain.user.entity.User;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ public class OrdersService {
     private final CartRepository cartRepository;
 
     @Transactional
-    public Orders saveOrderWithCartItems(Long userId) {
-        userId = 1L; // dummy
+    public Orders saveOrderWithCartItems(User user) {
+        long userId = user.getId(); // dummy
         // 1. 유저 장바구니 조회
         List<Cart> carts = cartRepository.findAllByUserId(userId);
         if (carts.isEmpty()) {
@@ -29,13 +30,13 @@ public class OrdersService {
         }
 
         // 2. Orders 객체 생성
-        Orders order = Orders.of(userId);
+        Orders order = Orders.of(user);
 
         // 3. 장바구니 -> OrderItem 변환해서 Orders에 추가
         for (Cart cart : carts) {
             OrderItem orderItem = OrderItem.of(
                     order,
-                    cart.getItem().getItemId(),
+                    cart.getItem(),
                     cart.getCartQuantity(),
                     cart.getItem().getPrice() * cart.getCartQuantity()   // 상품 가격 기준
             );

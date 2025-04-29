@@ -1,30 +1,29 @@
-package shoong.web_backend.domain.cart.entity;
+package shoong.web_backend.domain.item_image.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.user.entity.User;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Cart {
+@Builder
+public class ItemImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cartId;
+    private Long id;
 
-    // Cart -> Item (ManyToOne)
+    private String url;
+
+    private LocalDateTime createdAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    private Integer cartQuantity;
 }
