@@ -15,22 +15,6 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 활성화
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)) // 세션 사용
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/graphql", "/playground", "/graphiql", "/**").permitAll() // GitHub OAuth API 허용
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form.disable()) // 로그인 폼 비활성화
-                .httpBasic(basic -> basic.disable());
-
-        return http.build();
-    }
-
-    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000")); // 프론트엔드 도메인 허용

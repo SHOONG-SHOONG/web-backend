@@ -1,1 +1,2 @@
-package shoong.web_backend.domain.user.entity;// Example
+package shoong.web_backend.domain.user.entity;
+
