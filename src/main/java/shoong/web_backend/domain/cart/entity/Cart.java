@@ -28,13 +28,13 @@ public class Cart {
 
     private Integer cartQuantity;
 
-    public Cart(Long userId, Item item, Integer quantity) {
-        this.userId = userId;
+    public Cart(User user, Item item, Integer cartQuantity) {
+        this.user = user;
         this.item = item;
-        this.quantity = quantity;
+        this.cartQuantity = cartQuantity;
     }
 
-    public void updateQuantity(int quantity) {
-        this.quantity = quantity;
+    public void updateQuantity(int cartQuantity) {
+        this.cartQuantity = cartQuantity;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import shoong.web_backend.domain.brand.entity.Brand;
 import shoong.web_backend.domain.brand.repository.BrandRepository;
 import shoong.web_backend.domain.item.entity.Item;
+import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.item.repository.ItemRepository;
 
 import java.time.LocalDateTime;
@@ -38,7 +39,7 @@ public class ItemController {
         item.setCategory("Electronics");
         item.setCreatedAt(LocalDateTime.now());
         item.setDiscountExpiredAt(LocalDateTime.now().plusDays(7));
-        item.setStatus(1);
+        item.setStatus(ItemStatus.ON_SALE);
 
         itemRepository.save(item);
         return ResponseEntity.ok().build();

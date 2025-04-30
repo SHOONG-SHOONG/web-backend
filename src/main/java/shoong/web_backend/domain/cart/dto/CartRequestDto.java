@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CartRequest {
+public class CartRequestDto {
     private Long itemId;
-    private int quantity;
+    private int cartQuantity;
     Long userId = 1L; // 임시 로그인 유저
 }
