@@ -27,6 +27,8 @@ public class Live {
     private String title;
     private String description;
 
+    private String imageUrl;
+
     private LocalDateTime liveDate;
 
     @Enumerated(EnumType.STRING)
