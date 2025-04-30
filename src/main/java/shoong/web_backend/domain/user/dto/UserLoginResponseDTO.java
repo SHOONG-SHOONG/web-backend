@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDTO {
+public class UserLoginResponseDTO {
     private Long brandId;
     private String userEmail;
     private String userPassword;      // 필요에 따라 제외 가능
