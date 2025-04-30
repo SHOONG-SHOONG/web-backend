@@ -2,6 +2,7 @@ package shoong.web_backend.domain.order_item.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.orders.entity.Orders;
 
 @Entity
@@ -21,8 +22,9 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Orders order;
 
-    @Column(nullable = false)
-    private Long itemId; // 상품 아이디
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
 
     @Column(nullable = false)
     private Integer orderItemQuantity;
@@ -30,10 +32,10 @@ public class OrderItem {
     @Column(nullable = false)
     private Long orderItemPrice;
 
-    public static OrderItem of(Orders order, Long itemId, Integer orderItemQuantity, Long orderItemPrice) {
+    public static OrderItem of(Orders order, Item item, Integer orderItemQuantity, Long orderItemPrice) {
         return OrderItem.builder()
                 .order(order)
-                .itemId(itemId)
+                .item(item)
                 .orderItemQuantity(orderItemQuantity)
                 .orderItemPrice(orderItemPrice)
                 .build();

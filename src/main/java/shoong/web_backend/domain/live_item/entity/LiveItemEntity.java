@@ -1,1 +1,0 @@
-package shoong.web_backend.domain.live_item.entity;// Example

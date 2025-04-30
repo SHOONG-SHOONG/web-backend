@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
+import shoong.web_backend.domain.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,9 +25,6 @@ public class Orders {
     private Long orderId;
 
     @Column(nullable = false)
-    private Long userId;
-
-    @Column(nullable = false)
     private Long totalPrice;
 
     @Column(nullable = false)
@@ -36,9 +34,13 @@ public class Orders {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    public static Orders of(Long userId) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public static Orders of(User user) {
         return Orders.builder()
-                .userId(userId)
+                .user(user)
                 .totalPrice(0L)
                 .orderDate(LocalDateTime.now())
                 .build();
