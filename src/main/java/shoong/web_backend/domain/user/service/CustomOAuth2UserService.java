@@ -6,9 +6,8 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import shoong.web_backend.domain.user.dto.UserDTO;
+import shoong.web_backend.domain.user.dto.UserLoginResponseDTO;
 
-import java.time.LocalDate;
 import java.util.Map;
 
 @Service
@@ -36,7 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
             Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
 
-            UserDTO user = UserDTO.builder()
+            UserLoginResponseDTO user = UserLoginResponseDTO.builder()
                     .userEmail(kakaoAccount.get("email") != null ? kakaoAccount.get("email").toString() : null)
                     .userPassword(null)
                     .userName(properties != null && properties.get("nickname") != null ? properties.get("nickname").toString() : null)
