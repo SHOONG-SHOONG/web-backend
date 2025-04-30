@@ -27,4 +27,14 @@ public class Cart {
     private User user;
 
     private Integer cartQuantity;
+
+    public Cart(User user, Item item, Integer cartQuantity) {
+        this.user = user;
+        this.item = item;
+        this.cartQuantity = cartQuantity;
+    }
+
+    public void updateQuantity(int cartQuantity) {
+        this.cartQuantity = cartQuantity;
+    }
 }
