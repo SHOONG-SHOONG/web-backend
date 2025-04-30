@@ -6,9 +6,8 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration    // 스프링 실행시 설정파일 읽어드리기 위한 어노테이션
+@Configuration
 public class SwaggerConfig {
-
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI().addServersItem(new Server().url("/").description("https설정"))
@@ -17,8 +16,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("SHOONG")
-                .description("SHOONG - API 명세서")
+                .title("Shoong Web API")
+                .description("Shoong")
                 .version("1.0.0");
     }
 }
