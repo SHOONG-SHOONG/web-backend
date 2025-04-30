@@ -9,6 +9,7 @@ import shoong.web_backend.domain.live.enums.LiveStatus;
 import shoong.web_backend.domain.live_item.entity.LiveItem;
 import shoong.web_backend.domain.user.entity.User;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class Live {
 
     private String imageUrl;
 
-    private LocalDateTime liveDate;
+    private LocalDate liveDate;
 
     @Enumerated(EnumType.STRING)
     private LiveStatus liveStatus;
