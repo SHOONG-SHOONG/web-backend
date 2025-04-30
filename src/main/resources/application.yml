@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://3.35.238.35:3306/shoong?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://-------:3306/shoong?serverTimezone=Asia/Seoul
     username: shoong
     password: shoong
     driver-class-name: com.mysql.cj.jdbc.Driver
