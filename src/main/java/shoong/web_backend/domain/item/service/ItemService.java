@@ -1,11 +1,13 @@
 package shoong.web_backend.domain.item.service;// example
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shoong.web_backend.domain.brand.entity.Brand;
 import shoong.web_backend.domain.brand.repository.BrandRepository;
 import shoong.web_backend.domain.item.dto.ItemRequestDto;
 import shoong.web_backend.domain.item.entity.Item;
+import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.item.repository.ItemRepository;
 
 @Service
@@ -15,6 +17,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final BrandRepository brandRepository;
 
+    @Transactional
     public void createItem(ItemRequestDto dto) {
         Brand brand = brandRepository.findById(dto.getBrandId())
                 .orElseThrow(() -> new RuntimeException("Brand not found"));
@@ -29,8 +32,16 @@ public class ItemService {
                 .category(dto.getCategory())
                 .createdAt(dto.getCreatedAt())
                 .discountExpiredAt(dto.getDiscountExpiredAt())
+                .status(ItemStatus.ON_SALE)
                 .build();
 
         itemRepository.save(item);
+    }
+
+    @Transactional
+    public void deleteItem(Long itemId) {
+        Item item = itemRepository.findById(itemId)
+                        .orElseThrow(() -> new RuntimeException("Item not found"));
+        item.setStatus(ItemStatus.DELETED);
     }
 }

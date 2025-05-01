@@ -2,6 +2,7 @@ package shoong.web_backend.domain.item.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import shoong.web_backend.domain.item_image.dto.ItemImageDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,5 +28,5 @@ public class ItemRequestDto {
 
     private LocalDateTime discountExpiredAt;
 
-    private List<ItemRequestDto> itemImages;
+    private List<ItemImageDto> itemImages;
 }

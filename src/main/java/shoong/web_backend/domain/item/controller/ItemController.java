@@ -2,13 +2,8 @@ package shoong.web_backend.domain.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import shoong.web_backend.domain.brand.repository.BrandRepository;
+import org.springframework.web.bind.annotation.*;
 import shoong.web_backend.domain.item.dto.ItemRequestDto;
-import shoong.web_backend.domain.item.repository.ItemRepository;
 import shoong.web_backend.domain.item.service.ItemService;
 
 @RestController
@@ -16,13 +11,19 @@ import shoong.web_backend.domain.item.service.ItemService;
 @RequiredArgsConstructor
 public class ItemController {
 
-    private final ItemRepository itemRepository;
-    private final BrandRepository brandRepository;
     private final ItemService itemService;
 
+    //상품 등록
     @PostMapping
     public ResponseEntity<Void> createItem(@RequestBody ItemRequestDto requestDto){
         itemService.createItem(requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    //상품 삭제
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
+        itemService.deleteItem(itemId);
         return ResponseEntity.ok().build();
     }
 }
