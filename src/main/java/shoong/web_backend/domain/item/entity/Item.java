@@ -31,18 +31,23 @@ public class Item {
     private Brand brand;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Wishlist> wishlists = new ArrayList<>();
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Cart> carts = new ArrayList<>();
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<LiveItem> liveItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<ItemImage> itemImages = new ArrayList<>();
 
     private String itemName;

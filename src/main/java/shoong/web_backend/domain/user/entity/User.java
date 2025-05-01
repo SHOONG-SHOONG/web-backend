@@ -44,10 +44,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Orders> ordersList = new ArrayList<> ();
+    private String userAddress;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Orders> orders = new ArrayList<> ();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Wishlist> wishlists = new ArrayList<> ();
 
     @OneToOne
@@ -55,8 +59,10 @@ public class User {
     private Brand brand;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Cart> carts = new ArrayList<> ();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Live> lives = new ArrayList<> ();
 }
