@@ -1,12 +1,16 @@
 package shoong.web_backend.domain.item.dto;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import shoong.web_backend.domain.item.enums.ItemStatus;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Getter
+@Setter
 public class ItemRequestDto {
+    private Long brandId;
+
     private String itemName;
 
     private Long price;
@@ -23,6 +27,5 @@ public class ItemRequestDto {
 
     private LocalDateTime discountExpiredAt;
 
-    @Enumerated(EnumType.STRING)
-    private ItemStatus status;
+    private List<ItemRequestDto> itemImages;
 }
