@@ -44,6 +44,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
+    private String userAddress;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Orders> orders = new ArrayList<> ();
