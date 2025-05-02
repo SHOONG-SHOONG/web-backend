@@ -1,5 +1,6 @@
 package shoong.web_backend.domain.live.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import shoong.web_backend.domain.live.enums.LiveStatus;

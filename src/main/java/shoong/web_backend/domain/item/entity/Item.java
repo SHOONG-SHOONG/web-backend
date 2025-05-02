@@ -1,5 +1,7 @@
 package shoong.web_backend.domain.item.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.persistence.*;
 import lombok.*;
 import shoong.web_backend.domain.brand.entity.Brand;
