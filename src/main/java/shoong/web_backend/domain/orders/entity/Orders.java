@@ -30,8 +30,11 @@ public class Orders {
     @Column(nullable = false)
     private LocalDateTime orderDate;
 
+    private String orderAddress;
+
     // Orders -> OrderItem (1:N)
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
