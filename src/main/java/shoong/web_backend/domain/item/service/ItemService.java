@@ -42,6 +42,11 @@ public class ItemService {
     public void deleteItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
                         .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        if (item.getStatus() == ItemStatus.DELETED){
+            throw new RuntimeException("이미 삭제된 상품입니다."); // 재삭제 방지
+        }
+
         item.setStatus(ItemStatus.DELETED);
     }
 }
