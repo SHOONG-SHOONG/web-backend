@@ -3,6 +3,8 @@ package shoong.web_backend.domain.live.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import shoong.web_backend.aws.AmazonS3Manager;
 import shoong.web_backend.domain.live.dto.LiveCreateRequestDto;
 import shoong.web_backend.domain.live.dto.LiveCreateResponseDto;
 import shoong.web_backend.domain.live.dto.LiveMainDto;
@@ -15,6 +17,7 @@ import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,20 +31,40 @@ public class LiveService {
 
     private final LiveRepository liveRepository;
     private final UserRepository userRepository;
+    private final AmazonS3Manager amazonS3Manager;
 
     @Transactional
-    public LiveCreateResponseDto createLive(LiveCreateRequestDto liveCreateRequestDto, User user) {
+    public LiveCreateResponseDto createLive(LiveCreateRequestDto liveCreateRequestDto,MultipartFile imageFile, User user) {
         if(user.getRole() == null || !user.getRole().equals(UserRole.STREAMER)) {
             throw new IllegalArgumentException("스트리머 권한이 있는 사용자만 라이브를 등록할 수 있습니다.");
         }
 
+        // 기본 이미지 URL (이미지가 없을 경우를 대비)
+        String imageUrl = "https://기본이미지URL.jpg"; // 필요시 기본 이미지 URL 설정
+
+//        MultipartFile imageFile = liveCreateRequestDto.getImageFile();
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                // S3에 라이브 이미지 업로드
+                String keyName = amazonS3Manager.generateLiveKeyName();
+                imageUrl = amazonS3Manager.upLoadFile(keyName, imageFile);
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다.", e);
+            }
+        } /*else if (liveCreateRequestDto.getImageUrl() != null && !liveCreateRequestDto.getImageUrl().isEmpty())*/ {
+            // 폼에서 URL 직접 입력한 경우 (테스트용)
+//            imageUrl = liveCreateRequestDto.getImageUrl();
+        }
+
+
         Live live = Live.builder()
                 .title(liveCreateRequestDto.getTitle())
                 .description(liveCreateRequestDto.getDescription())
-                .imageUrl(liveCreateRequestDto.getImageUrl())
+                .imageUrl(imageUrl)
                 .liveDate(liveCreateRequestDto.getLiveDate())
                 .liveStartTime(liveCreateRequestDto.getLiveStartTime())
-                .liveEndTime(liveCreateRequestDto.getLiveEndTime())
+//                .liveEndTime(liveCreateRequestDto.getLiveEndTime())
                 .liveStatus(LiveStatus.SCHEDULED)
                 .user(user)
                 .build();
