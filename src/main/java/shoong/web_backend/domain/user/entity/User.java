@@ -35,27 +35,22 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 유저 이메일: 고유 + 유효한 이메일 형식 + 비어있지 않음 + 최대 100자 제한
     @Email(message = "유효한 이메일 형식이어야 합니다.")
     @NotBlank(message = "이메일은 필수 항목입니다.")
     @Size(max = 100, message = "이메일은 최대 100자까지 입력할 수 있습니다.")
     private String userEmail;
 
-    // 비밀번호: 필수 + 최소 8자 이상 100자 이하
     @NotBlank(message = "비밀번호는 필수 항목입니다.")
     @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하로 입력해주세요.")
     private String userPassword;
 
-    // userName: 필수 + 길이 제한
     @NotBlank(message = "ID는 필수 항목입니다.")
     @Size(max = 50, message = "userName은 최대 50자까지 입력할 수 있습니다.")
     private String userName;
 
-    // 이름: 선택 입력 + 최대 길이 제한
     @Size(max = 50, message = "이름은 최대 50자까지 입력할 수 있습니다.")
     private String name;
 
-    // 전화번호: 선택 입력 + 최대 길이 제한
     @Size(max = 20, message = "전화번호는 최대 20자까지 입력할 수 있습니다.")
     private String userPhone;
 
@@ -64,13 +59,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    // 사업자 등록 번호: 선택 입력
     private String registrationNumber;
 
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
-    // 주소: 선택 입력 + 최대 길이 제한
     @Size(max = 200, message = "주소는 최대 200자까지 입력할 수 있습니다.")
     private String userAddress;
 
@@ -101,3 +94,4 @@ public class User {
         this.role = role;
     }
 }
+

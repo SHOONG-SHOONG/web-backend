@@ -2,6 +2,7 @@ server:
   port: 8080
   forward-headers-strategy: framework
 
+
 spring:
   jwt:
     secret: 시크릿 키
@@ -12,6 +13,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/shoong
     username: user1
     password: user1
+
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:

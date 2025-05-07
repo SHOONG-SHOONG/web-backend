@@ -45,89 +45,56 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
-        return new AuthenticationFailureHandler() {
-            @Override
-            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-                System.out.println("exception = " + exception);
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            }
+        return (request, response, exception) -> {
+            System.out.println("exception = " + exception);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         };
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // disable
         http
-                .httpBasic((basic) -> basic.disable())
-                .csrf((csrf) -> csrf.disable());
-
-        // form login
-        http
-                .formLogin((form) -> form.loginPage("/login")
-                        .loginProcessingUrl("/login")
-                        .successHandler(new CustomFormSuccessHandler(jwtUtil, refreshTokenService))
-                        .failureHandler(authenticationFailureHandler())
-                        .permitAll());
-
-        // oauth2 login
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .loginPage("/login")
-                        .userInfoEndpoint((userinfo) -> userinfo
-                                .userService(customOAuth2UserService))
-                        .successHandler(new CustomOAuth2SuccessHandler(jwtUtil, refreshTokenService))
-                        .failureHandler(authenticationFailureHandler())
-                        .permitAll());
-
-        // logout
-        http
-                .logout((auth) -> auth
-                        .logoutSuccessUrl("/")
-                        .permitAll());
-
-        // cors
-        http
-                .cors((cors) -> cors.configurationSource(new CorsConfigurationSource() {
-                    @Override
-                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                        CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                        configuration.setAllowedMethods(Collections.singletonList("*"));
-                        configuration.setAllowCredentials(true);
-                        configuration.setAllowedHeaders(Collections.singletonList("*"));
-                        configuration.setMaxAge(3600L);
-                        configuration.setExposedHeaders(Collections.singletonList("access"));
-
-                        return configuration;
-                    }
-                }));
-
-        // authorization
-        http.authorizeHttpRequests((auth) -> auth
+            .httpBasic((basic) -> basic.disable())
+            .csrf((csrf) -> csrf.disable())
+            .formLogin((form) -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .successHandler(new CustomFormSuccessHandler(jwtUtil, refreshTokenService))
+                .failureHandler(authenticationFailureHandler())
+                .permitAll())
+            .oauth2Login((oauth2) -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint((userinfo) -> userinfo.userService(customOAuth2UserService))
+                .successHandler(new CustomOAuth2SuccessHandler(jwtUtil, refreshTokenService))
+                .failureHandler(authenticationFailureHandler())
+                .permitAll())
+            .logout((logout) -> logout.logoutSuccessUrl("/").permitAll())
+            .cors((cors) -> cors.configurationSource(new CorsConfigurationSource() {
+                @Override
+                public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setMaxAge(3600L);
+                    configuration.setExposedHeaders(Collections.singletonList("access"));
+                    return configuration;
+                }
+            }))
+            .authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/", "/login", "/join", "/logout", "/oauth2-jwt-header").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
-                .anyRequest().authenticated());
-
-        // 인가되지 않은 사용자에 대한 exception -> 프론트엔드로 코드 응답
-        http.exceptionHandling((exception) ->
-                exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        }));
-
-        // jwt filter
-        http
-                .addFilterAfter(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
-        // custom logout filter 등록
-        http
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
-
-        // session stateless
-        http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .anyRequest().authenticated())
+            .exceptionHandling((exception) -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                }))
+            .addFilterAfter(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
+            .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
 }
+
