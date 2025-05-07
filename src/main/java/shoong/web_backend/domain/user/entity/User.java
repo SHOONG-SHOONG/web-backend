@@ -3,9 +3,7 @@ package shoong.web_backend.domain.user.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
 import lombok.*;
 import shoong.web_backend.domain.brand.entity.Brand;
 import shoong.web_backend.domain.cart.entity.Cart;
@@ -15,6 +13,7 @@ import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.enums.UserStatus;
 import shoong.web_backend.domain.wishlist.entity.Wishlist;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,8 +64,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    // 사업자 등록 번호: 선택 입력 + 고정 길이 (예: "000000-0000000")
-    // @Pattern(regexp = "\\d{3}-\\d{2}-\\d{5}", message = "사업자등록번호 형식이 올바르지 않습니다. 예: 123-45-67890")
+    // 사업자 등록 번호: 선택 입력
     private String registrationNumber;
 
     @Enumerated(EnumType.STRING)

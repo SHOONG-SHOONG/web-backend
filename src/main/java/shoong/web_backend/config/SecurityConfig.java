@@ -29,7 +29,6 @@ import shoong.web_backend.domain.user.repository.RefreshRepository;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
 import shoong.web_backend.domain.user.service.oauth2.CustomOAuth2UserService;
 
-
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
@@ -45,7 +44,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationFailureHandler authenticationFailureHandler(){
+    public AuthenticationFailureHandler authenticationFailureHandler() {
         return new AuthenticationFailureHandler() {
             @Override
             public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
@@ -62,7 +61,7 @@ public class SecurityConfig {
                 .httpBasic((basic) -> basic.disable())
                 .csrf((csrf) -> csrf.disable());
 
-        // form
+        // form login
         http
                 .formLogin((form) -> form.loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -70,7 +69,7 @@ public class SecurityConfig {
                         .failureHandler(authenticationFailureHandler())
                         .permitAll());
 
-        // oauth2
+        // oauth2 login
         http
                 .oauth2Login((oauth2) -> oauth2
                         .loginPage("/login")
@@ -97,7 +96,6 @@ public class SecurityConfig {
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
-
                         configuration.setExposedHeaders(Collections.singletonList("access"));
 
                         return configuration;
