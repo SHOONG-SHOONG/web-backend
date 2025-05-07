@@ -1,10 +1,8 @@
 package shoong.web_backend.domain.live.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import shoong.web_backend.domain.live.enums.LiveStatus;
 import shoong.web_backend.domain.live_item.entity.LiveItem;
 import shoong.web_backend.domain.user.entity.User;
@@ -17,6 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Live {
@@ -43,5 +42,5 @@ public class Live {
     private User user;
 
     @OneToMany(mappedBy = "live", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LiveItem> liveItems= new ArrayList<>();
+    private List<LiveItem> liveItems = new ArrayList<>();
 }

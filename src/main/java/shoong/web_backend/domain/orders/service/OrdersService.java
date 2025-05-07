@@ -1,6 +1,5 @@
 package shoong.web_backend.domain.orders.service;
 
-
 import jakarta.transaction.Transactional;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +25,9 @@ public class OrdersService {
     private final CartRepository cartRepository;
 
     @Transactional
-    public OrdersResponseDto saveOrderWithCartItems(Long mockUserID) {
-        // long userId = user.getId();
+    public Orders saveOrderWithCartItems(User user) {
+        long userId = user.getId();
+
 
         // 1. 유저 장바구니 조회
         List<Cart> carts = cartRepository.findAllByUserId(mockUserID);

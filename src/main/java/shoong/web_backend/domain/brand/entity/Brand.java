@@ -29,3 +29,4 @@ public class Brand {
     @Builder.Default
     private List<Item> items = new ArrayList<>();
 }
+
