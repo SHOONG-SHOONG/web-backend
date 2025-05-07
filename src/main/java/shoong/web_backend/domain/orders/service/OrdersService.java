@@ -25,12 +25,12 @@ public class OrdersService {
     private final CartRepository cartRepository;
 
     @Transactional
-    public Orders saveOrderWithCartItems(User user) {
+    public OrdersResponseDto saveOrderWithCartItems(User user) {
         long userId = user.getId();
 
 
         // 1. 유저 장바구니 조회
-        List<Cart> carts = cartRepository.findAllByUserId(mockUserID);
+        List<Cart> carts = cartRepository.findAllByUserId(userId);
         if (carts.isEmpty()) {
             throw new IllegalStateException("장바구니가 비어있습니다.");
         }
@@ -38,7 +38,7 @@ public class OrdersService {
         // 2. Orders 객체 생성
         // mock User 생성
         User mockUser = User.builder()
-                .id(mockUserID)
+                .id(userId)
                 .userEmail("test@client.com")
                 .userName("테스트구매자")
                 .role(UserRole.CLIENT)
@@ -60,7 +60,7 @@ public class OrdersService {
         Orders savedOrder = ordersRepository.save(order);
 
         // 5. 장바구니 비우기
-        cartRepository.deleteAllByUserId(mockUserID);
+        cartRepository.deleteAllByUserId(userId);
 
         return OrdersResponseDto.builder()
                 .orderId(savedOrder.getOrderId())

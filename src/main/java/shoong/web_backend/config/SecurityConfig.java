@@ -82,11 +82,15 @@ public class SecurityConfig {
                     return configuration;
                 }
             }))
-            .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/", "/login", "/join", "/logout", "/oauth2-jwt-header").permitAll()
-                .requestMatchers("/admin").hasRole("ADMIN")
-                .anyRequest().authenticated())
-            .exceptionHandling((exception) -> exception
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers(
+                                "/*", "/login", "/join", "/logout", "/oauth2-jwt-header",
+                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+
+                .exceptionHandling((exception) -> exception
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 }))
