@@ -1,6 +1,5 @@
 package shoong.web_backend.domain.orders.service;
 
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ public class OrdersService {
     @Transactional
     public Orders saveOrderWithCartItems(User user) {
         long userId = user.getId();
-        
+
         // 1. 유저 장바구니 조회
         List<Cart> carts = cartRepository.findAllByUserId(userId);
         if (carts.isEmpty()) {

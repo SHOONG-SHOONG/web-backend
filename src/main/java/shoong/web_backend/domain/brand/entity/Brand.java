@@ -26,5 +26,7 @@ public class Brand {
     private String brandDescription;
 
     @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Item> items = new ArrayList<>();
 }
+

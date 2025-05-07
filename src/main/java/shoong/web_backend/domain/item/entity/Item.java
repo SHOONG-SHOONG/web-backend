@@ -1,20 +1,18 @@
 package shoong.web_backend.domain.item.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.persistence.*;
 import lombok.*;
 import shoong.web_backend.domain.brand.entity.Brand;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.item_image.entity.ItemImage;
 import shoong.web_backend.domain.live_item.entity.LiveItem;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.wishlist.entity.Wishlist;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter

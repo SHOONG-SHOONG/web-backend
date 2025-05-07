@@ -34,15 +34,13 @@ public class LiveService {
     private final AmazonS3Manager amazonS3Manager;
 
     @Transactional
-    public LiveCreateResponseDto createLive(LiveCreateRequestDto liveCreateRequestDto, User user) {
-        if(user.getRole() == null || !user.getRole().equals(UserRole.STREAMER)) {
+    public LiveCreateResponseDto createLive(LiveCreateRequestDto liveCreateRequestDto, MultipartFile imageFile, User user) {
+        if (user.getRole() == null || !user.getRole().equals(UserRole.STREAMER)) {
             throw new IllegalArgumentException("스트리머 권한이 있는 사용자만 라이브를 등록할 수 있습니다.");
         }
 
         // 기본 이미지 URL (이미지가 없을 경우를 대비)
         String imageUrl = "https://기본이미지URL.jpg"; // 필요시 기본 이미지 URL 설정
-
-        MultipartFile imageFile = liveCreateRequestDto.getImageFile();
 
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
@@ -53,7 +51,6 @@ public class LiveService {
                 throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다.", e);
             }
         }
-
 
         Live live = Live.builder()
                 .title(liveCreateRequestDto.getTitle())
@@ -106,7 +103,7 @@ public class LiveService {
         List<Live> endedLives = liveRepository
                 .findTopNByLiveStatusOrderByLiveEndTimeDesc(LiveStatus.COMPLETED, remaining);
 
-        for(Live live : endedLives) {
+        for (Live live : endedLives) {
             result.add(new LiveMainDto(live.getId(), live.getTitle(), live.getImageUrl()));
         }
 
@@ -132,7 +129,7 @@ public class LiveService {
                                         item.getItem().getItemName(),
                                         item.getItem().getItemImages().get(0).getUrl(),
                                         item.getItem().getPrice()
-        ))
+                                ))
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
@@ -142,11 +139,11 @@ public class LiveService {
         // 1. 브랜드 ID로 유저 ID 찾기
         Optional<User> user = userRepository.findByBrandBrandId(brandId);
 
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             // 2. 유저 ID로 진행 중인 라이브 방송 찾기
             Optional<Live> live = liveRepository.findFirstByUserIdAndLiveStatus(user.get().getId(), LiveStatus.ONGOING);
 
-            if(live.isPresent()) {
+            if (live.isPresent()) {
                 Live ongoingLive = live.get();
                 LiveMainDto liveMainDto = new LiveMainDto(
                         ongoingLive.getId(),
@@ -158,6 +155,4 @@ public class LiveService {
         }
         return Optional.empty();
     }
-
-
 }

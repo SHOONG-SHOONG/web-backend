@@ -45,10 +45,9 @@ public class LiveController {
             @RequestParam(value = "LiveDate", required = false) LocalDate liveDate,
             @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile
-//             User user // 테스트 용으로 주석 해둠 나중에 유저 처리
     ) {
         // DTO로 변환
-        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title,description,imageFile,liveDate,startTime);
+        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description, imageFile, liveDate, startTime);
 
         LiveCreateResponseDto responseDto = liveService.createLive(requestDto, mockUser);
         return ResponseEntity.ok(responseDto);

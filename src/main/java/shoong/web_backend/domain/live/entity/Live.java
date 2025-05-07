@@ -42,5 +42,5 @@ public class Live {
     private User user;
 
     @OneToMany(mappedBy = "live", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LiveItem> liveItems= new ArrayList<>();
+    private List<LiveItem> liveItems = new ArrayList<>();
 }
