@@ -50,7 +50,7 @@ public class LiveController {
         // DTO로 변환
         LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title,description,imageFile,liveDate,startTime);
 
-        LiveCreateResponseDto responseDto = liveService.createLive(requestDto, imageFile, mockUser);
+        LiveCreateResponseDto responseDto = liveService.createLive(requestDto, mockUser);
         return ResponseEntity.ok(responseDto);
     }
 
