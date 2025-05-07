@@ -18,11 +18,10 @@ public class JoinService {
 
     public void join(JoinDto joinDto) {
         // 이메일 또는 유저명 중복 확인
-        boolean isExist = userRepository.existsByUserEmailAndUserName(
-                joinDto.getUserEmail(), joinDto.getUserName());
+        boolean isExist = userRepository.existsByUserEmail(joinDto.getUserEmail());
 
         if (isExist) {
-            System.out.println("이미 존재하는 사용자입니다.");
+            System.out.println("이미 존재하는 사용자입니다.(중복 이메일)");
             return;
         }
         // 회원가입 분기점

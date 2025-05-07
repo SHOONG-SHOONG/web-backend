@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import shoong.web_backend.domain.user.dto.oauth2.CustomOAuth2User;
+import shoong.web_backend.domain.user.entity.User;
+import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.jwt.JWTUtil;
 import shoong.web_backend.domain.user.repository.UserRepository;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
@@ -33,8 +35,13 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         String name = customOAuth2User.getName(); // 실제 이름
         String username = customOAuth2User.getUsername(); // DB 저장용 식별자
-        long id = userRepository.findByUserName(username).getId();
-        String role = authentication.getAuthorities().iterator().next().getAuthority();
+        String email = customOAuth2User.getEmail();
+        String role = UserRole.CLIENT.toString();
+        //String role = authentication.getAuthorities().iterator().next().getAuthority();
+        // 사용자 존재 여부 확인 및 저장
+        User user = userRepository.findByUserName(username);
+
+        long id = user.getId();
 
         Integer expireS = 24 * 60 * 60;
         String access = jwtUtil.createJwt("access", username, role, id,60 * 10 * 1000L);
