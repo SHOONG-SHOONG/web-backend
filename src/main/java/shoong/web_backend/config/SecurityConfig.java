@@ -26,6 +26,7 @@ import shoong.web_backend.domain.user.handler.CustomOAuth2SuccessHandler;
 import shoong.web_backend.domain.user.jwt.JWTFilter;
 import shoong.web_backend.domain.user.jwt.JWTUtil;
 import shoong.web_backend.domain.user.repository.RefreshRepository;
+import shoong.web_backend.domain.user.repository.UserRepository;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
 import shoong.web_backend.domain.user.service.oauth2.CustomOAuth2UserService;
 
@@ -37,7 +38,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final RefreshTokenService refreshTokenService;
     private final RefreshRepository refreshRepository;
-
+    private final UserRepository userRepository;
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -65,7 +66,7 @@ public class SecurityConfig {
             .oauth2Login((oauth2) -> oauth2
                 .loginPage("/login")
                 .userInfoEndpoint((userinfo) -> userinfo.userService(customOAuth2UserService))
-                .successHandler(new CustomOAuth2SuccessHandler(jwtUtil, refreshTokenService))
+                .successHandler(new CustomOAuth2SuccessHandler(jwtUtil,refreshTokenService,userRepository))
                 .failureHandler(authenticationFailureHandler())
                 .permitAll())
             .logout((logout) -> logout.logoutSuccessUrl("/").permitAll())
@@ -84,7 +85,7 @@ public class SecurityConfig {
             }))
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers(
-                                "/*", "/login", "/join", "/logout", "/oauth2-jwt-header",
+                                 "/login", "/join", "/logout", "/oauth2-jwt-header",
                                 "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
                         ).permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")

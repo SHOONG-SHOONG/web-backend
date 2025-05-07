@@ -40,11 +40,12 @@ public class JoinDto {
     // 주소는 필수 X
     private String userAddress;
 
-    public JoinDto(String userEmail, String userPassword, String userName, String userPhone,
+    public JoinDto(String userEmail, String userPassword, String name,String userName, String userPhone,
                    LocalDate birthDay, String registrationNumber, String userAddress) {
         this.userEmail = userEmail;
         this.userPassword = userPassword;
         this.userName = userName;
+        this.name = name;
         this.userPhone = userPhone;
         this.birthDay = birthDay;
         this.registrationNumber = registrationNumber;

@@ -2,6 +2,8 @@ package shoong.web_backend.domain.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import shoong.web_backend.domain.item.dto.ItemRequestDto;
 import shoong.web_backend.domain.item.service.ItemService;
@@ -15,7 +17,7 @@ public class ItemController {
 
     //상품 등록
     @PostMapping
-    public ResponseEntity<Void> createItem(@RequestBody ItemRequestDto requestDto){
+    public ResponseEntity<Void> createItem(@RequestBody ItemRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails){
         itemService.createItem(requestDto);
         return ResponseEntity.ok().build();
     }

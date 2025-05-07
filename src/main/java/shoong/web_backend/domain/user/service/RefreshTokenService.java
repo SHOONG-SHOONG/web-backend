@@ -19,7 +19,6 @@ public class RefreshTokenService {
                 .refresh(refresh)
                 .expiration(new Date(System.currentTimeMillis() + expireS * 1000L).toString())
                 .build();
-
         refreshRepository.save(refreshEntity);
     }
 }

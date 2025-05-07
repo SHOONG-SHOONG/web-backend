@@ -59,4 +59,3 @@ cloud:
         live: ${AWS_BUCKET_LIVE}
     stack:
       auto: false
-

@@ -26,7 +26,9 @@ public class JWTUtil {
     private Claims getPayload(String token){
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
     }
-
+    public long getUserId(String token){
+        return getPayload(token).get("userId", Long.class);
+    }
     public String getUsername(String token){
         return getPayload(token).get("username", String.class);
     }
@@ -43,14 +45,16 @@ public class JWTUtil {
         return getPayload(token).getExpiration().before(new Date());
     }
 
-    public String createJwt(String category, String username, String role, Long expiredMs){
+    public String createJwt(String category, String username, String role, Long userId, Long expiredMs) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("username", username)
                 .claim("role", role)
+                .claim("userId", userId)  // 👈 userId 추가
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
                 .compact();
     }
+
 }

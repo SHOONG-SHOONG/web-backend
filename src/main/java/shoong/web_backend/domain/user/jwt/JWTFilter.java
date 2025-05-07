@@ -25,7 +25,7 @@ import shoong.web_backend.domain.user.enums.UserRole;
     3. 검증 성공 시 인증 정보를 SecurityContextHolder에 설정
     4. 이를 통해 보호된 API 접근 가능
 **/
- @Component
+@Component
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
@@ -34,6 +34,12 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String access = null;
         access = request.getHeader("access");
+
+        // 로그에 access token 출력
+        if (access != null) {
+            System.out.println("Access Token from header: " + access);
+        }
+
         // 2. access 없으면 쿠키에서 accessToken 찾기
         if (access == null) {
             Cookie[] cookies = request.getCookies();
@@ -46,15 +52,22 @@ public class JWTFilter extends OncePerRequestFilter {
                 }
             }
         }
+
+        // 로그에 access token 출력 (쿠키에서 찾은 경우)
+        if (access != null) {
+            System.out.println("Access Token from cookie: " + access);
+        }
+
         // access token null
         if (access == null) {
             filterChain.doFilter(request, response);
             return;
         }
+
         // access token expired
-        try{
+        try {
             jwtUtil.isExpired(access);
-        } catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -62,15 +75,16 @@ public class JWTFilter extends OncePerRequestFilter {
         String category = jwtUtil.getCategory(access);
 
         // not access token
-        if(!category.equals("access")){
+        if (!category.equals("access")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-
+        long userId = jwtUtil.getUserId(access);
         String username = jwtUtil.getUsername(access);
         String role = jwtUtil.getRole(access);
 
-        User userPrincipal =User.builder()
+        User userPrincipal = User.builder()
+                .id(userId)
                 .userName(username)
                 .role(UserRole.valueOf(role))
                 .userPassword("temp_pw")
