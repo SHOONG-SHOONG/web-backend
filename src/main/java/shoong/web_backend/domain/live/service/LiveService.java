@@ -64,7 +64,7 @@ public class LiveService {
                 .title(liveCreateRequestDto.getTitle())
                 .description(liveCreateRequestDto.getDescription())
                 .imageUrl(imageUrl)
-                .liveDate(liveCreateRequestDto.getLiveDate())
+                .liveDate(Optional.ofNullable(liveCreateRequestDto.getLiveDate()).orElse(LocalDate.now()))
                 .liveStartTime(liveCreateRequestDto.getLiveStartTime())
                 .liveEndTime(null)
                 .liveStatus(LiveStatus.SCHEDULED)

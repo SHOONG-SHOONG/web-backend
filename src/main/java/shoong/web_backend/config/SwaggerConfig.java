@@ -19,8 +19,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         // 보안 요구 사항
         SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList(ACCESS_TOKEN_NAME)
-                .addList(REFRESH_TOKEN_NAME);
+                .addList(ACCESS_TOKEN_NAME);
+        // .addList(REFRESH_TOKEN_NAME)
 
         // Access Token: access 헤더 사용 (Bearer 타입 아님)
         SecurityScheme accessTokenScheme = new SecurityScheme()
@@ -29,18 +29,18 @@ public class SwaggerConfig {
                 .name("access");  // 실제 JWTFilter가 읽는 헤더 이름
 
         // Refresh Token: refresh 헤더 사용
-        SecurityScheme refreshTokenScheme = new SecurityScheme()
-                .type(SecurityScheme.Type.APIKEY)
-                .in(SecurityScheme.In.HEADER)
-                .name("refresh");  // 실제 사용하는 헤더 이름
+//        SecurityScheme refreshTokenScheme = new SecurityScheme()
+//                .type(SecurityScheme.Type.APIKEY)
+//                .in(SecurityScheme.In.HEADER)
+//                .name("refresh");  // 실제 사용하는 헤더 이름
 
         return new OpenAPI()
                 .addServersItem(new Server().url("/").description("https 설정"))
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
                 .components(new Components()
-                        .addSecuritySchemes(ACCESS_TOKEN_NAME, accessTokenScheme)
-                        .addSecuritySchemes(REFRESH_TOKEN_NAME, refreshTokenScheme));
+                        .addSecuritySchemes(ACCESS_TOKEN_NAME, accessTokenScheme));
+        //.addSecuritySchemes(REFRESH_TOKEN_NAME, refreshTokenScheme));
     }
 
     private Info apiInfo() {

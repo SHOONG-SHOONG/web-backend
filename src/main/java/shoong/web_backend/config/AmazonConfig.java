@@ -36,6 +36,9 @@ public class AmazonConfig {
     @Value("${cloud.aws.s3.path.live}")
     private String livePath;
 
+    @Value("${cloud.aws.s3.path.brand}")
+    private String brandPath;
+
     @PostConstruct
     public void init() {
         this.awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
