@@ -14,6 +14,7 @@ import shoong.web_backend.domain.user.dto.oauth2.OAuth2Response;
 import shoong.web_backend.domain.user.dto.oauth2.OAuth2UserDto;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
+import shoong.web_backend.domain.user.enums.UserStatus;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
 @Service
@@ -41,7 +42,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // provider name + provider Id 로 username(식별자) 생성
         String username = response.getProvider() + " " + response.getProviderId();
         CustomOAuth2User customOAuth2User = null;
-        String role = String.valueOf(UserRole.ADMIN);
+        String role = String.valueOf(UserRole.CLIENT);
 
         // DB save
         saveUser(response, username, role);
@@ -78,6 +79,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .name(oAuth2Response.getName())
                     .userEmail(oAuth2Response.getEmail())
                     .role(UserRole.CLIENT)
+                    .userStatus(UserStatus.ACTIVE)
                     .build();
             userRepository.save(saveUserEntity);
         }
