@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import shoong.web_backend.domain.item.condition.ItemSearchCondition;
 import shoong.web_backend.domain.item.dto.ItemRequestDto;
 import shoong.web_backend.domain.item.dto.ItemResponseDto;
+import shoong.web_backend.domain.item.dto.ItemUpdateRequestDto;
 import shoong.web_backend.domain.item.service.ItemService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 
@@ -56,7 +57,15 @@ public class ItemController {
         Page<ItemResponseDto> result = itemService.searchItems(condition, pageable);
         return ResponseEntity.ok(result);
     }
-
+    // 상품 수정
+    // CRUD: Patch, URI: /item/{itemId}
+    @PatchMapping("/{itemId}")
+    public ResponseEntity<Void> updateItem(@PathVariable Long itemId,
+                                           @RequestBody @Valid ItemUpdateRequestDto updateDto,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        itemService.updateItem(itemId, updateDto, userDetails.getUserId());
+        return ResponseEntity.ok().build();
+    }
     //상품 삭제
     @DeleteMapping("/{itemId}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
