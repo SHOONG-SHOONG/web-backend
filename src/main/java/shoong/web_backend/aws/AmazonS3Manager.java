@@ -101,4 +101,9 @@ public class AmazonS3Manager {
         String uuid = UUID.randomUUID().toString();
         return amazonConfig.getLivePath() + '/' + uuid;
     }
+
+    public String generateBrandKeyName() {
+        String uuid = UUID.randomUUID().toString();
+        return amazonConfig.getBrandPath() + '/' + uuid;
+    }
 }
