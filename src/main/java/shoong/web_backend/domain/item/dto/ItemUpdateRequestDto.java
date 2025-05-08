@@ -39,7 +39,7 @@ public class ItemUpdateRequestDto {
     @NotBlank(message = "카테고리는 필수 항목입니다.")
     private String category;
 
-    @NotNull(message = "이미지 리스트는 null일 수 없습니다.")
-    @Size(min = 1, message = "최소 1개 이상의 이미지가 필요합니다.")
-    private List<@Valid ItemImageDto> itemImages;
+//    @NotNull(message = "이미지 리스트는 null일 수 없습니다.")
+//    @Size(min = 1, message = "최소 1개 이상의 이미지가 필요합니다.")
+//    private List<@Valid ItemImageDto> itemImages;
 }

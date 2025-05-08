@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.webjars.NotFoundException;
 import shoong.web_backend.domain.brand.entity.Brand;
 import shoong.web_backend.domain.brand.repository.BrandRepository;
@@ -20,6 +21,8 @@ import shoong.web_backend.domain.item.dto.ItemUpdateRequestDto;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.item.repository.ItemRepository;
+import shoong.web_backend.domain.item_image.entity.ItemImage;
+import shoong.web_backend.domain.item_image.service.ItemImageService;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
@@ -31,8 +34,10 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final BrandRepository brandRepository;
     private final UserRepository userRepository;
+    private final ItemImageService itemImageService;
+    // 아이템을 생성할 때 아이템 이미지도 함께 저장
     @Transactional
-    public void createItem(ItemRequestDto dto, Long userId) {
+    public void createItem(ItemRequestDto dto, Long userId, MultipartFile[] imageFiles) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저 조회 실패"));
 
@@ -49,10 +54,20 @@ public class ItemService {
                 .category(dto.getCategory())
                 .createdAt(dto.getCreatedAt())
                 .discountExpiredAt(dto.getDiscountExpiredAt())
-            //    .itemImages()
                 .status(ItemStatus.ON_SALE)
                 .build();
 
+        // 먼저 item을 저장 (ID 생성을 위해)
+        itemRepository.save(item);
+
+        // 이미지 처리 및 item.itemImages 컬렉션 업데이트
+        List<ItemImage> savedImages = itemImageService.saveMultiImagesAndReturnList(imageFiles, item);
+
+        // 저장된 이미지들을 item의 itemImages 컬렉션에 추가
+        // (ItemImageService에서 이미 설정했다면 이 단계는 생략 가능)
+        item.getItemImages().addAll(savedImages);
+
+        // 변경사항 저장 (트랜잭션 내에서 자동으로 반영되지만, 명시적으로 호출)
         itemRepository.save(item);
     }
 

@@ -41,8 +41,8 @@ public class ItemRequestDto {
     @Future(message = "할인 종료일은 미래의 시간이어야 합니다.")
     private LocalDateTime discountExpiredAt;
 
-    @NotNull(message = "이미지 리스트는 null일 수 없습니다.")
-    @Size(min = 1, message = "최소 1개 이상의 이미지가 필요합니다.")
-    private List<@Valid ItemImageDto> itemImages;
+//    @NotNull(message = "이미지 리스트는 null일 수 없습니다.")
+//    @Size(min = 1, message = "최소 1개 이상의 이미지가 필요합니다.")
+//    private List<@Valid ItemImageDto> itemImages;
 }
 
