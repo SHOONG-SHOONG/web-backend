@@ -20,7 +20,7 @@ public class SwaggerConfig {
         // 보안 요구 사항
         SecurityRequirement securityRequirement = new SecurityRequirement()
                 .addList(ACCESS_TOKEN_NAME);
-        // .addList(REFRESH_TOKEN_NAME)
+         // .addList(REFRESH_TOKEN_NAME)
 
         // Access Token: access 헤더 사용 (Bearer 타입 아님)
         SecurityScheme accessTokenScheme = new SecurityScheme()
@@ -40,7 +40,7 @@ public class SwaggerConfig {
                 .addSecurityItem(securityRequirement)
                 .components(new Components()
                         .addSecuritySchemes(ACCESS_TOKEN_NAME, accessTokenScheme));
-        //.addSecuritySchemes(REFRESH_TOKEN_NAME, refreshTokenScheme));
+                        //.addSecuritySchemes(REFRESH_TOKEN_NAME, refreshTokenScheme));
     }
 
     private Info apiInfo() {
