@@ -6,12 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import shoong.web_backend.domain.brand.dto.BrandRequestDto;
+import shoong.web_backend.domain.brand.dto.BrandResponseDto;
 import shoong.web_backend.domain.brand.service.BrandService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
@@ -42,5 +40,13 @@ public class BrandController {
         brandService.createBrand(brandRequestDto, user);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @Operation(summary = "브랜드 상세 조회", description = "브랜드 ID로 상세 정보를 조회합니다.")
+    @GetMapping("/{brandId}")
+    public ResponseEntity<BrandResponseDto> getBrand(@PathVariable Long brandId) {
+        BrandResponseDto brandResponseDto = brandService.getBrandById(brandId);
+
+        return ResponseEntity.ok(brandResponseDto);
     }
 }
