@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import shoong.web_backend.aws.AmazonS3Manager;
+import shoong.web_backend.domain.item.entity.Item;
+import shoong.web_backend.domain.item.repository.ItemRepository;
 import shoong.web_backend.domain.live.dto.LiveCreateRequestDto;
 import shoong.web_backend.domain.live.dto.LiveCreateResponseDto;
 import shoong.web_backend.domain.live.dto.LiveMainDto;
@@ -13,6 +15,8 @@ import shoong.web_backend.domain.live.entity.Live;
 import shoong.web_backend.domain.live.enums.LiveStatus;
 import shoong.web_backend.domain.live.repository.LiveRepository;
 import shoong.web_backend.domain.live_item.dto.LiveItemResponseDto;
+import shoong.web_backend.domain.live_item.entity.LiveItem;
+import shoong.web_backend.domain.live_item.repository.LiveItemRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
@@ -32,6 +36,8 @@ public class LiveService {
     private final LiveRepository liveRepository;
     private final UserRepository userRepository;
     private final AmazonS3Manager amazonS3Manager;
+    private final ItemRepository itemRepository;
+    private final LiveItemRepository liveItemRepository;
 
     @Transactional
     public LiveCreateResponseDto createLive(LiveCreateRequestDto liveCreateRequestDto, User user) {
@@ -54,18 +60,36 @@ public class LiveService {
             }
         }
 
-
         Live live = Live.builder()
                 .title(liveCreateRequestDto.getTitle())
                 .description(liveCreateRequestDto.getDescription())
                 .imageUrl(imageUrl)
                 .liveDate(liveCreateRequestDto.getLiveDate())
                 .liveStartTime(liveCreateRequestDto.getLiveStartTime())
+                .liveEndTime(null)
                 .liveStatus(LiveStatus.SCHEDULED)
                 .user(user)
                 .build();
 
         Live savedLive = liveRepository.save(live);
+
+        List<Long> itemIds = liveCreateRequestDto.getItemIds();
+        List<Item> items = itemRepository.findAllById(itemIds);
+
+        if (items.size() != itemIds.size()) {
+            throw new IllegalArgumentException("존재하지 않는 아이템 ID가 포함되어 있습니다.");
+        }
+
+        List<LiveItem> liveItems = items.stream()
+                .map(item -> {
+                    LiveItem liveItem = new LiveItem();
+                    liveItem.setLive(savedLive);
+                    liveItem.setItem(item);
+                    return liveItem;
+                })
+                .collect(Collectors.toList());
+
+        liveItemRepository.saveAll(liveItems);
 
         return new LiveCreateResponseDto(
                 savedLive.getId(),

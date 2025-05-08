@@ -18,6 +18,7 @@ import shoong.web_backend.domain.live.service.LiveService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
+import shoong.web_backend.domain.user.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,14 +31,7 @@ import java.util.Optional;
 public class LiveController {
 
     private final LiveService liveService;
-
-    // 테스트용 유저 생성 (스트리머 권한)
-    User mockUser = User.builder()
-            .id(1L)
-            .userEmail("test@streamer.com")
-            .userName("테스트스트리머")
-            .role(UserRole.STREAMER)
-            .build();
+    private final UserRepository userRepository;
 
     @Operation(summary = "라이브 생성", description = "라이브 방송 생성 API")
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -47,17 +41,16 @@ public class LiveController {
             @RequestParam(value = "LiveDate", required = false) LocalDate liveDate,
             @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam(value = "itemIds", required = false) List<Long> itemIds,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
         // DTO로 변환
-        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description, imageFile, liveDate, startTime);
+        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description, imageFile, liveDate, startTime, itemIds);
 
-        System.out.println("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ");
-        System.out.println(customUserDetails.getUserId());
-        System.out.println(customUserDetails.getUsername());
-        System.out.println(customUserDetails.getPassword());
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
 
-        LiveCreateResponseDto responseDto = liveService.createLive(requestDto, mockUser);
+        LiveCreateResponseDto responseDto = liveService.createLive(requestDto, user);
         return ResponseEntity.ok(responseDto);
     }
 
