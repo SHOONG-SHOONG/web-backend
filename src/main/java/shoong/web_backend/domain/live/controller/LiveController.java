@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import shoong.web_backend.domain.live.dto.LiveCreateRequestDto;
@@ -14,6 +15,7 @@ import shoong.web_backend.domain.live.dto.LiveCreateResponseDto;
 import shoong.web_backend.domain.live.dto.LiveMainDto;
 import shoong.web_backend.domain.live.dto.LiveScheduledDto;
 import shoong.web_backend.domain.live.service.LiveService;
+import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 
@@ -44,10 +46,16 @@ public class LiveController {
             @RequestParam("description") String description,
             @RequestParam(value = "LiveDate", required = false) LocalDate liveDate,
             @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile
-    ) {
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            ) {
         // DTO로 변환
         LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description, imageFile, liveDate, startTime);
+
+        System.out.println("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ");
+        System.out.println(customUserDetails.getUserId());
+        System.out.println(customUserDetails.getUsername());
+        System.out.println(customUserDetails.getPassword());
 
         LiveCreateResponseDto responseDto = liveService.createLive(requestDto, mockUser);
         return ResponseEntity.ok(responseDto);
