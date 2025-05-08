@@ -27,6 +27,7 @@ public class JoinService {
         // 회원가입 분기점
         // 사업자 번호가 존재할 경우 -> 스트리머
         // 사업자 번호가 존재하지 않을 경우 -> 클라이언트
+        System.out.println("유저 회원가입 분기점 돌입");
         if (joinDto.getRegistrationNumber() == null || joinDto.getRegistrationNumber().isBlank()) {
             User userEntity = User.builder()
                     .userEmail(joinDto.getUserEmail())

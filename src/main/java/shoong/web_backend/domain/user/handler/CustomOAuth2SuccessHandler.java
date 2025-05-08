@@ -36,11 +36,12 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String name = customOAuth2User.getName(); // 실제 이름
         String username = customOAuth2User.getUsername(); // DB 저장용 식별자
         String email = customOAuth2User.getEmail();
+        // 카카오 소셜 로그인 유저는 애초에
         String role = UserRole.CLIENT.toString();
         //String role = authentication.getAuthorities().iterator().next().getAuthority();
         // 사용자 존재 여부 확인 및 저장
+        System.out.println("유저 고유 ID" + username);
         User user = userRepository.findByUserName(username);
-
         long id = user.getId();
 
         Integer expireS = 24 * 60 * 60;
