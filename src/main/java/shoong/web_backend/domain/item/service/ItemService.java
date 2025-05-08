@@ -1,22 +1,27 @@
 package shoong.web_backend.domain.item.service;// example
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 import shoong.web_backend.domain.brand.entity.Brand;
 import shoong.web_backend.domain.brand.repository.BrandRepository;
 import shoong.web_backend.domain.item.condition.ItemSearchCondition;
 import shoong.web_backend.domain.item.dto.ItemRequestDto;
 import shoong.web_backend.domain.item.dto.ItemResponseDto;
+import shoong.web_backend.domain.item.dto.ItemUpdateRequestDto;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.item.repository.ItemRepository;
 import shoong.web_backend.domain.user.entity.User;
+import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
 @Service
@@ -77,28 +82,6 @@ public class ItemService {
         return itemResponseDto;
     }
 
-//    @Transactional(readOnly = true)
-//    public List<ItemResponseDto> getItemsByCategory(String category){
-//        List<ItemResponseDto> itemResponseDtos = itemRepository.findByCategory(category).stream()
-//                .map(item -> ItemResponseDto.builder()
-//                        .itemId(item.getItemId())
-//                        .brandId(item.getBrand().getBrandId())
-//                        .itemName(item.getItemName())
-//                        .price(item.getPrice())
-//                        .discountRate(item.getDiscountRate() * 100) // 0.1 -> 10%
-//                        .finalPrice((int) (item.getPrice() * (1.0 - item.getDiscountRate())))
-//                        .wishlistCount(item.getWishlists().size())
-//                        .description(item.getDescription())
-//                        .itemQuantity(item.getItemQuantity())
-//                        .category(item.getCategory())
-//                        .discountExpiredAt(item.getDiscountExpiredAt())
-//                        .status(item.getStatus())
-//                        .itemImages(item.getItemImages())
-//                        .build())
-//                .collect(Collectors.toList());
-//        return itemResponseDtos;
-//    }
-
     // 동적 쿼리 부분
     @Transactional(readOnly = true)
     public Page<ItemResponseDto> searchItems(ItemSearchCondition condition, Pageable pageable) {
@@ -115,5 +98,24 @@ public class ItemService {
         }
 
         item.setStatus(ItemStatus.DELETED);
+    }
+    @Transactional
+    public void updateItem(Long itemId, @Valid ItemUpdateRequestDto updateDto, Long userId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("해당 상품이 존재하지 않습니다."));
+        User user = userRepository.findById(userId).orElseThrow(()->new NotFoundException("유저 조회 실패"));
+        if(user.getRole().equals(UserRole.STREAMER)){
+
+        }
+        if(user.getRole().equals(UserRole.CLIENT)){
+            throw new AuthorizationDeniedException("권한이 없는 유저(클라이언트)로부터의 상품 업데이트 요청");
+        }
+        item.setItemName(updateDto.getItemName());
+        item.setPrice(updateDto.getPrice());
+        item.setDiscountRate(updateDto.getDiscountRate());
+        item.setDescription(updateDto.getDescription());
+        item.setItemQuantity(updateDto.getItemQuantity());
+        item.setCategory(updateDto.getCategory());
+        itemRepository.save(item);
     }
 }

@@ -38,11 +38,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         else {
             return null;
         }
-
         // provider name + provider Id 로 username(식별자) 생성
         String username = response.getProvider() + " " + response.getProviderId();
         CustomOAuth2User customOAuth2User = null;
         String role = String.valueOf(UserRole.CLIENT);
+        System.out.println("식별자 생성 loadUser 실행" + username);
 
         // DB save
         saveUser(response, username, role);
@@ -70,7 +70,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User isExist = userRepository.findByUserEmail(oAuth2Response.getEmail());
 
         if (isExist != null) {
-            isExist.setUserName(oAuth2Response.getName());
+            isExist.setUserName(username);
             isExist.setUserEmail(oAuth2Response.getEmail());
             isExist.setRole(UserRole.CLIENT);
         } else {
