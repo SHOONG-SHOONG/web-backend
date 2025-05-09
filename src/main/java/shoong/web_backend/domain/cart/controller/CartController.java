@@ -43,8 +43,8 @@ public class CartController {
 
     @Operation(summary = "장바구니 수량 수정", description = "장바구니 수정 api")
     @PatchMapping("/change/{cartId}")
-    public ResponseEntity<Void> updateCartQuantity(@PathVariable Long cartId, @RequestParam int quantity) {
-        cartService.updateCartQuantity(cartId, quantity);
+    public ResponseEntity<Void> updateCartQuantity(@PathVariable Long cartId, @RequestParam int quantity, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        cartService.updateCartQuantity(cartId, quantity, customUserDetails.getUserId());
         return ResponseEntity.ok().build();
     }
 
