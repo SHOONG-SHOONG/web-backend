@@ -58,7 +58,8 @@ public class ItemController {
     // CRUD: Get, URI: /item/{itemId}
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemResponseDto> getItem(@PathVariable Long itemId) {
-        return ResponseEntity.ok(itemService.getItem(itemId));
+        ItemResponseDto itemResponseDto = itemService.getItem(itemId);
+        return ResponseEntity.ok(itemResponseDto);
     }
 
     //    // 카테고리별 상품 조회
