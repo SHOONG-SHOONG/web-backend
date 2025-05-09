@@ -53,7 +53,7 @@ public class Orders {
     public void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);
         orderItem.setOrder(this);
-
-        totalPrice += orderItem.getOrderItemPrice() * orderItem.getOrderItemQuantity();
+        totalPrice = 0L;
+        totalPrice += orderItem.getOrderItemPrice();
     }
 }

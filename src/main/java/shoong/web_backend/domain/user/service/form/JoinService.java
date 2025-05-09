@@ -18,21 +18,22 @@ public class JoinService {
 
     public void join(JoinDto joinDto) {
         // 이메일 또는 유저명 중복 확인
-        boolean isExist = userRepository.existsByUserEmailAndUserName(
-                joinDto.getUserEmail(), joinDto.getUserName());
+        boolean isExist = userRepository.existsByUserEmail(joinDto.getUserEmail());
 
         if (isExist) {
-            System.out.println("이미 존재하는 사용자입니다.");
+            System.out.println("이미 존재하는 사용자입니다.(중복 이메일)");
             return;
         }
         // 회원가입 분기점
         // 사업자 번호가 존재할 경우 -> 스트리머
         // 사업자 번호가 존재하지 않을 경우 -> 클라이언트
-        if (joinDto.getRegistrationNumber().isBlank()) {
+        System.out.println("유저 회원가입 분기점 돌입");
+        if (joinDto.getRegistrationNumber() == null || joinDto.getRegistrationNumber().isBlank()) {
             User userEntity = User.builder()
                     .userEmail(joinDto.getUserEmail())
                     .userPassword(bCryptPasswordEncoder.encode(joinDto.getUserPassword()))
                     .userName(joinDto.getUserName())
+                    .name(joinDto.getName())
                     .userPhone(joinDto.getUserPhone())
                     .birthDay(joinDto.getBirthDay())
                     .registrationNumber(joinDto.getRegistrationNumber())
@@ -48,6 +49,7 @@ public class JoinService {
                     .userEmail(joinDto.getUserEmail())
                     .userPassword(bCryptPasswordEncoder.encode(joinDto.getUserPassword()))
                     .userName(joinDto.getUserName())
+                    .name(joinDto.getName())
                     .userPhone(joinDto.getUserPhone())
                     .birthDay(joinDto.getBirthDay())
                     .registrationNumber(joinDto.getRegistrationNumber())

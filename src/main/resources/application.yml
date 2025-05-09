@@ -37,7 +37,6 @@ spring:
             scope:
               - profile_nickname
               - account_email
-              - profile_image
             client-name: Kakao
         provider:
           kakao:
@@ -60,4 +59,3 @@ cloud:
         live: ${AWS_BUCKET_LIVE}
     stack:
       auto: false
-

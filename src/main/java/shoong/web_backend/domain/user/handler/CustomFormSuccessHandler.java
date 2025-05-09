@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.jwt.JWTUtil;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
 import shoong.web_backend.domain.user.util.CookieUtil;
@@ -28,17 +29,22 @@ public class CustomFormSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException, IOException {
         // create JWT
+        // CustomUserDetails 객체 꺼내기
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        long userId = customUserDetails.getUserId();  // 👈 여기서 가져옴
         String username = authentication.getName();
         String role = authentication.getAuthorities().iterator().next().getAuthority();
 
         // access
-        String access = jwtUtil.createJwt("access", username, role, 60 * 10 * 1000L);
+        String access = jwtUtil.createJwt("access", username, role ,userId,60 * 10 * 1000L);
         response.setHeader("access", access);
 
         // refresh
         Integer expireS = 24 * 60 * 60;
-        String refresh = jwtUtil.createJwt("refresh", username, role, expireS * 1000L);
+        String refresh = jwtUtil.createJwt("refresh", username, role, userId,expireS * 1000L);
         response.addCookie(CookieUtil.createCookie("refresh", refresh, expireS));
+        System.out.println("엑세스 토큰" + access);
+        System.out.println("리프레시 토큰" + refresh);
 
         // refresh 토큰 DB 저장
         refreshTokenService.saveRefresh(username, expireS, refresh);

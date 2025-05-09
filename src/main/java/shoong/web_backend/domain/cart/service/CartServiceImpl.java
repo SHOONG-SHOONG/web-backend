@@ -1,6 +1,7 @@
 package shoong.web_backend.domain.cart.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import shoong.web_backend.domain.cart.dto.CartRequestDto;
 import shoong.web_backend.domain.cart.dto.CartResponseDto;
@@ -18,22 +19,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
 
-    private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final ItemRepository itemRepository;
 
     @Override
-    public CartResponseDto addToCart(CartRequestDto request) {
-        Long userId = 1L; // 임시 로그인 유저
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public CartResponseDto addToCart(CartRequestDto request, User user) {
 
         Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
-        Cart cart = cartRepository.findByUserIdAndItem_ItemId(userId, request.getItemId())
+        if(request.getCartQuantity() > item.getItemQuantity()) {
+            throw new IllegalStateException("재고 수량을 초과했습니다.");
+        }
+
+        Cart cart = cartRepository.findByUserIdAndItem_ItemId(user.getId(), request.getItemId())
                 .orElseGet(() -> new Cart(user, item, 0));
+
+        if (cart.getCartQuantity() + request.getCartQuantity() > item.getItemQuantity()) {
+            throw new IllegalStateException("재고 수량을 초과했습니다.");
+        }
 
         cart.updateQuantity(cart.getCartQuantity() + request.getCartQuantity());
         Cart savedCart = cartRepository.save(cart);
@@ -42,18 +46,28 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public List<CartResponseDto> getCartList() {
-        Long userId = 1L;
-        List<Cart> carts = cartRepository.findAllByUserId(userId);
+    public List<CartResponseDto> getCartList(User user) {
+
+        List<Cart> carts = cartRepository.findAllByUserId(user.getId());
+
         return carts.stream()
                 .map(CartResponseDto::from)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void updateCartQuantity(Long cartId, int quantity) {
+    public void updateCartQuantity(Long cartId, int quantity, Long userId) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        if (!cart.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("해당 장바구니에 접근 권한이 없습니다.");
+        }
+
+        if (quantity > cart.getItem().getItemQuantity()) {
+            throw new IllegalStateException("재고 수량을 초과했습니다.");
+        }
+
         cart.updateQuantity(quantity);
         cartRepository.save(cart);
     }

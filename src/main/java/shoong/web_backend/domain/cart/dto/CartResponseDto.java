@@ -15,6 +15,7 @@ public class CartResponseDto {
     private Double discountRate;
     private String category;
     private String description;
+    private String imageUrl;
 
     //장바구니 조회
     public static CartResponseDto from(Cart cart) {
@@ -27,6 +28,7 @@ public class CartResponseDto {
         response.setDiscountRate(cart.getItem().getDiscountRate());
         response.setCategory(cart.getItem().getCategory());
         response.setDescription(cart.getItem().getDescription());
+        response.setImageUrl(cart.getItem().getItemImages().get(0).getUrl());
         return response;
     }
 }
