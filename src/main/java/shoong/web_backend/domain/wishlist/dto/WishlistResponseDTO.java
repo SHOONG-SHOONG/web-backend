@@ -16,14 +16,12 @@ public class WishlistResponseDTO {
     private String itemName;
     private Long price;
     private double discountRate;
-    private Integer itemQuantity;
-    private int totalPrice;
+    private int finalPrice;
 
     public static WishlistResponseDTO from(Wishlist wishlist) {
-        int quantity = wishlist.getItem().getItemQuantity();
         Long price = wishlist.getItem().getPrice();
         double discountRate = wishlist.getItem().getDiscountRate();
-        int totalPrice = (int) ((price * (1 - discountRate)) * quantity);
+        int finalPrice = (int) (price * (1 - discountRate));
 
         return WishlistResponseDTO.builder()
                 .wishlistId(wishlist.getId())
@@ -31,8 +29,7 @@ public class WishlistResponseDTO {
                 .itemName(wishlist.getItem().getItemName())
                 .price(price)
                 .discountRate(discountRate)
-                .itemQuantity(quantity)
-                .totalPrice(totalPrice)
+                .finalPrice(finalPrice)
                 .build();
     }
 

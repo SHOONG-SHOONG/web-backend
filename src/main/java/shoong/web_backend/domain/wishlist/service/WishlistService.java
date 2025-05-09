@@ -1,10 +1,10 @@
 package shoong.web_backend.domain.wishlist.service;
 
+import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.wishlist.dto.WishlistResponseDTO;
 import java.util.List;
 
 public interface WishlistService {
-    List<WishlistResponseDTO> getWishlistByUserId(Long userId);
-    void addWishlistItem(Long userId, Long itemId);
-    void deleteWishlistItem(Long wishlistId);
+    List<WishlistResponseDTO> getWishlist(User user);
+    boolean toggleWishlist(User user, Long itemId);
 }
