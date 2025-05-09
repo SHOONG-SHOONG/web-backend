@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import shoong.web_backend.aws.AmazonS3Manager;
+import shoong.web_backend.domain.brand.dto.BrandItemDto;
 import shoong.web_backend.domain.brand.dto.BrandRequestDto;
+import shoong.web_backend.domain.brand.dto.BrandResponseDto;
 import shoong.web_backend.domain.brand.entity.Brand;
 import shoong.web_backend.domain.brand.repository.BrandRepository;
 import shoong.web_backend.domain.user.entity.User;
@@ -14,6 +16,7 @@ import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -53,5 +56,27 @@ public class BrandService {
 
         user.setBrand(brand);
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public BrandResponseDto getBrandById(Long brandId) {
+        Brand brand = brandRepository.findById(brandId) .orElseThrow(() ->
+                new IllegalArgumentException("해당 브랜드가 존재하지 않습니다."));
+
+        List<BrandItemDto> brandItems = brand.getItems().stream()
+                .map(item -> BrandItemDto.builder()
+                        .itemId(item.getItemId())
+                        .name(item.getItemName())
+                        .price(item.getPrice())
+                        .imageUrl(item.getItemImages().get(0).getUrl())
+                        .build())
+                .toList();
+
+        return BrandResponseDto.builder()
+                .brandName(brand.getBrandName())
+                .brandDescription(brand.getBrandDescription())
+                .logoUrl(brand.getLogoUrl())
+                .items(brandItems)
+                .build();
     }
 }

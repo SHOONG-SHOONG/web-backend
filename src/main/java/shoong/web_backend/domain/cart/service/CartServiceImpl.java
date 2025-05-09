@@ -18,22 +18,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
 
-    private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final ItemRepository itemRepository;
 
     @Override
-    public CartResponseDto addToCart(CartRequestDto request) {
-        Long userId = 1L; // 임시 로그인 유저
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public CartResponseDto addToCart(CartRequestDto request, User user) {
 
         Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
-        Cart cart = cartRepository.findByUserIdAndItem_ItemId(userId, request.getItemId())
+        if(request.getCartQuantity() > item.getItemQuantity()) {
+            throw new IllegalStateException("재고 수량을 초과했습니다.");
+        }
+
+        Cart cart = cartRepository.findByUserIdAndItem_ItemId(user.getId(), request.getItemId())
                 .orElseGet(() -> new Cart(user, item, 0));
+
+        if (cart.getCartQuantity() + request.getCartQuantity() > item.getItemQuantity()) {
+            throw new IllegalStateException("재고 수량을 초과했습니다.");
+        }
 
         cart.updateQuantity(cart.getCartQuantity() + request.getCartQuantity());
         Cart savedCart = cartRepository.save(cart);
@@ -42,9 +45,10 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public List<CartResponseDto> getCartList() {
-        Long userId = 1L;
-        List<Cart> carts = cartRepository.findAllByUserId(userId);
+    public List<CartResponseDto> getCartList(User user) {
+
+        List<Cart> carts = cartRepository.findAllByUserId(user.getId());
+
         return carts.stream()
                 .map(CartResponseDto::from)
                 .collect(Collectors.toList());
@@ -54,6 +58,11 @@ public class CartServiceImpl implements CartService {
     public void updateCartQuantity(Long cartId, int quantity) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        if (quantity > cart.getItem().getItemQuantity()) {
+            throw new IllegalStateException("재고 수량을 초과했습니다.");
+        }
+
         cart.updateQuantity(quantity);
         cartRepository.save(cart);
     }

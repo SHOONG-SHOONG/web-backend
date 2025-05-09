@@ -8,5 +8,4 @@ import lombok.Setter;
 public class CartRequestDto {
     private Long itemId;
     private int cartQuantity;
-    Long userId = 1L; // 임시 로그인 유저
 }

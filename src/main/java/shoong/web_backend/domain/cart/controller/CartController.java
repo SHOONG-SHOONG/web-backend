@@ -1,42 +1,55 @@
 package shoong.web_backend.domain.cart.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import shoong.web_backend.domain.cart.dto.CartRequestDto;
 import shoong.web_backend.domain.cart.dto.CartResponseDto;
 import shoong.web_backend.domain.cart.service.CartService;
+import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
+import shoong.web_backend.domain.user.entity.User;
+import shoong.web_backend.domain.user.repository.UserRepository;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/cart")
 @RequiredArgsConstructor
 public class CartController {
 
     private final CartService cartService;
+    private final UserRepository userRepository;
 
-    //api/cart: 장바구니 담기
-    @PostMapping
-    public ResponseEntity<CartResponseDto> addToCart(@RequestBody CartRequestDto request) {
-        return ResponseEntity.ok(cartService.addToCart(request));
+    @Operation(summary = "장바구니 추가", description = "장바구니 추가 api")
+    @PostMapping("/add")
+    public ResponseEntity<CartResponseDto> addToCart(@RequestBody CartRequestDto request,
+                                                     @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
+
+        return ResponseEntity.ok(cartService.addToCart(request, user));
     }
 
-    //장바구니 조회
-    @GetMapping
-    public ResponseEntity<List<CartResponseDto>> getCartList() {
-        return ResponseEntity.ok(cartService.getCartList());
+    @Operation(summary = "장바구니 조회", description = "장바구니 조회 api")
+    @GetMapping("/get")
+    public ResponseEntity<List<CartResponseDto>> getCartList(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
+        return ResponseEntity.ok(cartService.getCartList(user));
     }
 
-    //장바구니 담긴 아이템 수량 변경
-    @PatchMapping("/{cartId}")
-    public ResponseEntity<Void> updateCartQuantity(@PathVariable Long cartId, @RequestBody CartRequestDto request) {
-        cartService.updateCartQuantity(cartId, request.getCartQuantity());
+    @Operation(summary = "장바구니 수량 수정", description = "장바구니 수정 api")
+    @PatchMapping("/change/{cartId}")
+    public ResponseEntity<Void> updateCartQuantity(@PathVariable Long cartId, @RequestParam int quantity) {
+        cartService.updateCartQuantity(cartId, quantity);
         return ResponseEntity.ok().build();
     }
 
-    //장바구니 물품 삭제
-    @DeleteMapping("/{cartId}")
+    @Operation(summary = "장바구니 삭제", description = "장바구니 삭제 api")
+    @DeleteMapping("/delete/{cartId}")
     public ResponseEntity<Void> deleteCartItem(@PathVariable Long cartId) {
         cartService.deleteCartItem(cartId);
         return ResponseEntity.ok().build();
