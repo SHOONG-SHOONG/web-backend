@@ -9,6 +9,6 @@ import java.util.List;
 public interface CartService {
     CartResponseDto addToCart(CartRequestDto request, User user);
     List<CartResponseDto> getCartList(User user);
-    void updateCartQuantity(Long cartId, int cartQuantity);
+    void updateCartQuantity(Long cartId, int cartQuantity, Long userId);
     void deleteCartItem(Long cartId);
 }

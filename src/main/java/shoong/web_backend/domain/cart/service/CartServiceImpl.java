@@ -1,6 +1,7 @@
 package shoong.web_backend.domain.cart.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import shoong.web_backend.domain.cart.dto.CartRequestDto;
 import shoong.web_backend.domain.cart.dto.CartResponseDto;
@@ -55,9 +56,13 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void updateCartQuantity(Long cartId, int quantity) {
+    public void updateCartQuantity(Long cartId, int quantity, Long userId) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        if (!cart.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("해당 장바구니에 접근 권한이 없습니다.");
+        }
 
         if (quantity > cart.getItem().getItemQuantity()) {
             throw new IllegalStateException("재고 수량을 초과했습니다.");
