@@ -17,7 +17,6 @@ import shoong.web_backend.domain.live.dto.LiveScheduledDto;
 import shoong.web_backend.domain.live.service.LiveService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
-import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
 import java.time.LocalDate;
@@ -67,7 +66,7 @@ public class LiveController {
         return liveService.getLiveScheduledByDate(date);
     }
 
-    @GetMapping("/brand/{brandId}/live-onGoing")
+    @GetMapping("/brand/live-onGoing/{brandId}")
     public ResponseEntity<Object> checkLiveOngoingByBrandId(@PathVariable Long brandId) {
         Optional<LiveMainDto> ongoingLiveDto = liveService.getLiveOngoingByBrandId(brandId);
 
