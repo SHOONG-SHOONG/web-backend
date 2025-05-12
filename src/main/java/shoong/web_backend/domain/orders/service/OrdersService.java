@@ -1,6 +1,8 @@
 package shoong.web_backend.domain.orders.service;
 
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
@@ -18,7 +20,8 @@ import shoong.web_backend.domain.orders.repository.OrdersRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,12 @@ public class OrdersService {
     private final UserRepository userRepository;
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
+    private final RedissonClient redissonClient;
+
+    private static final String ORDER_LOCK_PREFIX = "order:lock:";
+    private static final long WAIT_TIME = 10L;
+    private static final long LEASE_TIME = 5L;
+    private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
 
     /**
      * 장바구니 상품으로 주문 생성
@@ -39,18 +48,66 @@ public class OrdersService {
         Cart cart = findUserCarts(userId);
         validateCartsNotEmpty(cart);
 
-        Orders order = createOrderFromCarts(user, cart);
-        Orders savedOrder = saveOrder(order);
+        Set<Long> itemIds = getItemIdsFromCart(cart);
+        List<Long> sortedItemIds = itemIds.stream().sorted().toList();
 
-        List<OrderItem> orderItems = savedOrder.getOrderItems();
-        orderItemRepository.saveAll(orderItems);
+        Map<Long, RLock> lockMap = new HashMap<>();
 
-        decreaseItemStock(orderItems);
 
-        // order가 완료 되었으므로 카트 비우기
-        clearUserCart(userId);
+        try {
+            for (Long itemId : sortedItemIds) {
+                String lockKey = ORDER_LOCK_PREFIX + itemId;
+                RLock lock = redissonClient.getLock(lockKey);
 
-        return convertToOrderResponseDto(savedOrder);
+                boolean isLocked = lock.tryLock(WAIT_TIME, LEASE_TIME, TIME_UNIT);
+                if (!isLocked) {
+                    // 락 획득 실패 시 이미 획득한 락을 모두 해제
+                    releaseAllLocks(lockMap);
+                    throw new IllegalStateException("상품 재고 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
+                }
+
+                lockMap.put(itemId, lock);
+            }
+
+            // 주문 생성 및 처리
+            Orders order = createOrderFromCarts(user, cart);
+            Orders savedOrder = saveOrder(order);
+
+            List<OrderItem> orderItems = savedOrder.getOrderItems();
+            orderItemRepository.saveAll(orderItems);
+
+            // 재고 감소
+            decreaseItemStock(orderItems);
+
+            // 카트 비우기
+            clearUserCart(userId);
+
+            return convertToOrderResponseDto(savedOrder);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("주문 처리 중 인터럽트가 발생했습니다.", e);
+        } finally {
+            // 획득한 모든 락 해제
+            releaseAllLocks(lockMap);
+        }
+    }
+
+    private Set<Long> getItemIdsFromCart(Cart cart) {
+        Set<Long> itemIds = new HashSet<>();
+
+        // Cart에서 Item을 가져오는 방식에 따라 구현
+        itemIds.add(cart.getItem().getItemId());
+
+        return itemIds;
+    }
+
+    // 획득한 모든 락을 해제하는 메서드
+    private void releaseAllLocks(Map<Long, RLock> lockMap) {
+        for (RLock lock : lockMap.values()) {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     // ===== 사용자 관련 헬퍼 메서드 =====
