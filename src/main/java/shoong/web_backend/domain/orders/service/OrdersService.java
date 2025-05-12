@@ -1,9 +1,8 @@
 package shoong.web_backend.domain.orders.service;
 
-import jakarta.transaction.Transactional;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
@@ -12,6 +11,7 @@ import shoong.web_backend.domain.item.repository.ItemRepository;
 import shoong.web_backend.domain.order_item.dto.OrderItemDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
+import shoong.web_backend.domain.orders.dto.OrdersDetailDto;
 import shoong.web_backend.domain.orders.dto.OrdersResponseDto;
 import shoong.web_backend.domain.orders.entity.Orders;
 import shoong.web_backend.domain.orders.repository.OrdersRepository;
@@ -122,6 +122,14 @@ public class OrdersService {
     private List<OrderItemDto> convertToOrderItemDtoList(List<OrderItem> orderItems) {
         return orderItems.stream()
                 .map(OrderItemDto::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrdersDetailDto> findOrdersByUserId(Long userId) {
+        List<Orders> ordersList = ordersRepository.findByUserIdOrderByOrderDateDesc(userId);
+        return ordersList.stream()
+                .map(OrdersDetailDto::from)
                 .toList();
     }
 }
