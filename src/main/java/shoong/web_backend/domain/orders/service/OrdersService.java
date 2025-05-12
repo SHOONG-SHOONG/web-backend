@@ -7,8 +7,11 @@ import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
+import shoong.web_backend.domain.item.entity.Item;
+import shoong.web_backend.domain.item.repository.ItemRepository;
 import shoong.web_backend.domain.order_item.dto.OrderItemDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
+import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
 import shoong.web_backend.domain.orders.dto.OrdersResponseDto;
 import shoong.web_backend.domain.orders.entity.Orders;
 import shoong.web_backend.domain.orders.repository.OrdersRepository;
@@ -24,6 +27,8 @@ public class OrdersService {
     private final OrdersRepository ordersRepository;
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final ItemRepository itemRepository;
 
     /**
      * 장바구니 상품으로 주문 생성
@@ -36,6 +41,12 @@ public class OrdersService {
 
         Orders order = createOrderFromCarts(user, cart);
         Orders savedOrder = saveOrder(order);
+
+        List<OrderItem> orderItems = savedOrder.getOrderItems();
+        orderItemRepository.saveAll(orderItems);
+
+        decreaseItemStock(orderItems);
+
         // order가 완료 되었으므로 카트 비우기
         clearUserCart(userId);
 
@@ -88,6 +99,14 @@ public class OrdersService {
 
     private Orders saveOrder(Orders order) {
         return ordersRepository.save(order);
+    }
+
+    private void decreaseItemStock(List<OrderItem> orderItems) {
+        for( OrderItem orderItem : orderItems ) {
+            Item item = orderItem.getItem();
+            item.setItemQuantity(item.getItemQuantity() - orderItem.getOrderItemQuantity());
+            itemRepository.save(item);
+        }
     }
 
     // ===== DTO 변환 헬퍼 메서드 =====
