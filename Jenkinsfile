@@ -60,7 +60,7 @@ pipeline {
                 git config user.email "jenkins@shoong.store"
                 git add deployment.yaml
                 git commit -m "☑️ web-backend: Update image tag to ${TAG}"
-                git push origin main
+                git push origin develop
               '''
             }
           }
