@@ -1,20 +1,21 @@
 server:
   port: 8080
   forward-headers-strategy: framework
-
-
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB       # 최대 업로드 파일 크기
+      max-request-size: 15MB    # 요청 전체 크기 (여러 파일일 경우 고려)
   jwt:
-    secret: 시크릿 키
+    secret: ${JWT_SECRET}
   application:
     name: web_backend
 
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/shoong
-    username: user1
-    password: user1
-
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_USERNAME}
+    driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
     hibernate:
@@ -23,7 +24,7 @@ spring:
     properties:
       hibernate:
         format_sql: true  # SQL 보기 좋게 정렬
-    database-platform: org.hibernate.dialect.MySQL8Dialect  # MySQL8 기준
+    database-platform: org.hibernate.dialect.MariaDBDialect
 
   security:
     oauth2:
@@ -31,7 +32,7 @@ spring:
         registration:
           kakao:
             client-id: ${REST_API_KEY}
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             scope:
@@ -44,6 +45,10 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 cloud:
   aws:
@@ -51,11 +56,12 @@ cloud:
       access-key: ${AWS_ACCESS_KEY}
       secret-key: ${AWS_SECRET_KEY}
     region:
-      static: ap-northeast-2
+      static: ${AWS_REGION}
     s3:
-      bucket: ${AWS_S3_BUCKET}
+      bucket: ${S3_BUCKET_NAME}
       path:
-        item: ${AWS_BUCKET_ITEM}
-        live: ${AWS_BUCKET_LIVE}
+        item: item
+        live: live
+        brand: brand
     stack:
       auto: false
