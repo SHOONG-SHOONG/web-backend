@@ -17,10 +17,10 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
-                sh "docker build -f ../Dockerfile -t ${IMAGE_NAME}:latest GitOps"
-                sh "docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${TAG}"
-            }
+          steps {
+            sh "docker build -t ${IMAGE_NAME}:latest ."
+            sh "docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${TAG}"
+          }
         }
 
         stage('Login to Harbor') {
