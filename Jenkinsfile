@@ -49,24 +49,23 @@ pipeline {
                 rm -rf k8s-manifests
                 git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/SHOONG-SHOONG/k8s-manifests.git
         
-                # 2. 서비스 경로 이동 (backend, frontend 자동 분기)
-                cd k8s-manifests/${SERVICE_NAME}
+                # 2. 경로 이동
+                cd k8s-manifests/apps/web-backend
         
-                # 3. 이미지 경로 변경
+                # 3. 이미지 태그 교체
                 sed -i "s|image: harbor.shoong.store/.*/.*/.*|image: ${IMAGE_NAME}:${TAG}|" deployment.yaml
         
-                # 4. git commit & push
+                # 4. commit & push
                 git config user.name "jenkins-bot"
                 git config user.email "jenkins@shoong.store"
                 git add deployment.yaml
-                git commit -m "☑️ ${SERVICE_NAME}: Update image tag to ${TAG}"
+                git commit -m "☑️ web-backend: Update image tag to ${TAG}"
                 git push origin main
-        
-                echo "🐬 manifest 업데이트 및 푸시 완료"
               '''
             }
           }
         }
+
 
     }
 
