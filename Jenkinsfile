@@ -48,7 +48,10 @@ pipeline {
                 # 1. clone manifest repo
                 rm -rf k8s-manifests
                 git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/SHOONG-SHOONG/k8s-manifests.git
-        
+                
+                # 권한이 있는지 직접 curl로 확인
+                curl -u ${GIT_USER}:${GIT_TOKEN} https://api.github.com/repos/SHOONG-SHOONG/k8s-manifests
+
                 # 2. 경로 이동
                 cd k8s-manifests/apps/web-backend
         
