@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git url: 'https://github.com/SHOONG-SHOONG/jenkins.git', branch: 'main'
+                git url: 'https://github.com/SHOONG-SHOONG/web-backend.git', branch: 'develop'
             }
         }
 
