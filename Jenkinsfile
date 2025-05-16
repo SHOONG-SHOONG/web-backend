@@ -41,7 +41,7 @@ pipeline {
         
         stage('Update Manifest Repo') {
           steps {
-            withCredentials([usernamePassword(credentialsId: 'GitHub-Token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+            withCredentials([usernamePassword(credentialsId: 'webhook', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
               sh '''
                 echo "🔁 Manifest 레포 업데이트 시작"
         
