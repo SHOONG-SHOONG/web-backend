@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "harbor.shoong.store/webhook/${env.JOB_BASE_NAME}"
+        IMAGE_NAME = "harbor.shoong.store/shoong-backend/${env.JOB_BASE_NAME}"
         TAG = "${BUILD_NUMBER}"
         HARBOR_CREDENTIALS_ID = "Harbor"
         MANIFEST_REPO = "https://github.com/SHOONG-SHOONG/k8s-manifests.git"
