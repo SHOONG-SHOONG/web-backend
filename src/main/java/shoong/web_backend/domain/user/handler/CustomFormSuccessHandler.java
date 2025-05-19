@@ -33,15 +33,16 @@ public class CustomFormSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         long userId = customUserDetails.getUserId();  // 👈 여기서 가져옴
         String username = authentication.getName();
+        String userAlias = customUserDetails.getUserAlias();
         String role = authentication.getAuthorities().iterator().next().getAuthority();
 
         // access
-        String access = jwtUtil.createJwt("access", username, role ,userId,60 * 10 * 1000L);
+        String access = jwtUtil.createJwt("access", username, role ,userId, userAlias,60 * 10 * 1000L);
         response.setHeader("access", access);
 
         // refresh
         Integer expireS = 24 * 60 * 60;
-        String refresh = jwtUtil.createJwt("refresh", username, role, userId,expireS * 1000L);
+        String refresh = jwtUtil.createJwt("refresh", username, role, userId, userAlias,expireS * 1000L);
         response.addCookie(CookieUtil.createCookie("refresh", refresh, expireS));
         System.out.println("엑세스 토큰" + access);
         System.out.println("리프레시 토큰" + refresh);
@@ -52,7 +53,8 @@ public class CustomFormSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         // json 을 ObjectMapper 로 직렬화하여 전달
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("name", username);
-
+        // 2025-05-19 JWT PayLoad에 유저 별명(alias) 추가
+        // responseData.put("alias", userAlias);
         new ObjectMapper().writeValue(response.getWriter(), responseData);
     }
 }

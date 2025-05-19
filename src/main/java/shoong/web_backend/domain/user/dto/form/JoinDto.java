@@ -35,13 +35,15 @@ public class JoinDto {
 
     @NotNull(message = "생년월일은 필수입니다.")
     private LocalDate birthDay;
+    @Size(max = 20)
+    private String userAlias;
 
     private String registrationNumber;
     // 주소는 필수 X
     private String userAddress;
 
     public JoinDto(String userEmail, String userPassword, String name,String userName, String userPhone,
-                   LocalDate birthDay, String registrationNumber, String userAddress) {
+                   LocalDate birthDay, String registrationNumber, String userAddress,String userAlias) {
         this.userEmail = userEmail;
         this.userPassword = userPassword;
         this.userName = userName;
@@ -50,5 +52,6 @@ public class JoinDto {
         this.birthDay = birthDay;
         this.registrationNumber = registrationNumber;
         this.userAddress = userAddress;
+        this.userAlias = userAlias;
     }
 }

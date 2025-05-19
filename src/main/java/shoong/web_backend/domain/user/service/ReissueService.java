@@ -48,6 +48,7 @@ public class ReissueService {
 
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
+        String userAlias = jwtUtil.getUserAlias(refresh);
         long userId = jwtUtil.getUserId(refresh);
         // refresh DB 조회
         Boolean isExist = refreshRepository.existsByRefresh(refresh);
@@ -58,9 +59,9 @@ public class ReissueService {
         }
 
         // new tokens
-        String newAccess = jwtUtil.createJwt("access", username, role, userId,60 * 10 * 1000L);
+        String newAccess = jwtUtil.createJwt("access", username, role, userId, userAlias,60 * 10 * 1000L);
         Integer expiredS = 60 * 60 * 24;
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, userId,expiredS * 1000L);
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, userId, userAlias,expiredS * 1000L);
 
         // 기존 refresh DB 삭제, 새로운 refresh 저장
         refreshRepository.deleteByRefresh(refresh);

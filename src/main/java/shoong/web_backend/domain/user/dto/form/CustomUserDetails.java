@@ -41,6 +41,11 @@ public class CustomUserDetails implements UserDetails {
         return userEntity.getId();
     }
 
+    // 유저의 별명을 보관 -> securityContext에 저장
+    public String getUserAlias(){
+        return userEntity.getUserAlias();
+    }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

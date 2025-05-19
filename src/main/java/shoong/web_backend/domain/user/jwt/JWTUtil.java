@@ -34,6 +34,10 @@ public class JWTUtil {
         return getPayload(token).get("role", String.class);
     }
 
+     public String getUserAlias(String token){
+         return getPayload(token).get("useAlias", String.class);
+     }
+
     public String getCategory(String token){
         return getPayload(token).get("category", String.class);
     }
@@ -42,12 +46,13 @@ public class JWTUtil {
         return getPayload(token).getExpiration().before(new Date());
     }
 
-    public String createJwt(String category, String username, String role, Long userId, Long expiredMs) {
+    public String createJwt(String category, String username, String role, Long userId, String userAlias ,Long expiredMs) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("username", username)
                 .claim("role", role)
                 .claim("userId", userId)  // 👈 userId 추가
+                .claim("userAlias", userAlias) // 👈 userAliaas 추가 2025-05-19
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
