@@ -21,7 +21,7 @@ import java.util.List;
 @Table(
         name = "user",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user_email", "user_name"})
+                @UniqueConstraint(columnNames = {"user_email", "user_name", "user_alias"})
         }
 )
 @Getter
@@ -34,6 +34,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    //
+    @Size(max = 10, message = "별명은 최대 10자까지 입력할 수 있습니다.")
+    private String userAlias;
 
     @Email(message = "유효한 이메일 형식이어야 합니다.")
     @NotBlank(message = "이메일은 필수 항목입니다.")

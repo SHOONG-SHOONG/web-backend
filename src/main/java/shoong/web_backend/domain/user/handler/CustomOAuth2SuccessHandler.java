@@ -16,6 +16,7 @@ import shoong.web_backend.domain.user.jwt.JWTUtil;
 import shoong.web_backend.domain.user.repository.UserRepository;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
 import shoong.web_backend.domain.user.util.CookieUtil;
+import shoong.web_backend.generator.NickNameGenerator;
 
 /**
  * OAuth2 로그인 성공 후 JWT 발급
@@ -35,21 +36,25 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         String name = customOAuth2User.getName(); // 실제 이름
         String username = customOAuth2User.getUsername(); // DB 저장용 식별자
+
+        User user = userRepository.findByUserName(username);
+        String userAlias = user.getUserAlias();  // DB에 저장된 별명 가져오기
+
         String email = customOAuth2User.getEmail();
         // 카카오 소셜 로그인 유저는 애초에
         String role = UserRole.CLIENT.toString();
         //String role = authentication.getAuthorities().iterator().next().getAuthority();
         // 사용자 존재 여부 확인 및 저장
         System.out.println("유저 고유 ID" + username);
-        User user = userRepository.findByUserName(username);
         long id = user.getId();
-
         Integer expireS = 24 * 60 * 60;
-        String access = jwtUtil.createJwt("access", username, role, id,60 * 10 * 1000L);
-        String refresh = jwtUtil.createJwt("refresh", username, role, id,expireS * 1000L);
+        String access = jwtUtil.createJwt("access", username, role, id, userAlias,
+                60 * 10 * 1000L);
+        String refresh = jwtUtil.createJwt("refresh", username, role, id, userAlias,
+                expireS * 1000L);
 
-        System.out.println("엑세스 토큰" + access);
-        System.out.println("리프레시 토큰" + refresh);
+        // System.out.println("엑세스 토큰" + access);
+        // System.out.println("리프레시 토큰" + refresh);
         // refresh 토큰 DB 저장
         refreshTokenService.saveRefresh(username, expireS, refresh);
 
@@ -60,7 +65,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         // 이후에 JWT 를 읽어서 데이터를 가져올 수도 있지만, JWT 파싱 비용이 많이 들기 때문에
         // 처음 JWT 발급할 때 이름을 함께 넘긴 후, 로컬 스토리지에 저장한다.
         String encodedName = URLEncoder.encode(name, "UTF-8");
-        response.sendRedirect("http://localhost:3000/oauth2-jwt-header?name=" + encodedName);
+        System.out.println("리다이렉션 정상 실행");
+        response.sendRedirect("http://192.168.0.26/oauth2-jwt-header?name=" + encodedName);
     }
-
 }

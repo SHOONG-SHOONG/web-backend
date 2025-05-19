@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Base64;
 import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,11 +59,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
-        return new HttpCookieOAuth2AuthorizationRequestRepository();
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .httpBasic((basic) -> basic.disable())
@@ -78,16 +74,16 @@ public class SecurityConfig {
                         .userInfoEndpoint((userinfo) -> userinfo.userService(customOAuth2UserService))
                         .successHandler(new CustomOAuth2SuccessHandler(jwtUtil, refreshTokenService, userRepository))
                         .failureHandler(authenticationFailureHandler())
-                        // OAuth2 인증 요청을 쿠키에 저장하도록 설정
-                        .authorizationEndpoint(endpoint ->
-                                endpoint.authorizationRequestRepository(authorizationRequestRepository()))
                         .permitAll())
                 .logout((logout) -> logout.logoutSuccessUrl("/").permitAll())
                 .cors((cors) -> cors.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedOrigins(
+                                List.of("http://192.168.0.26", "http://localhost:3000")
+                        );
+
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -116,66 +112,4 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 세션 대신 쿠키를 사용하여 OAuth2 인증 요청 저장
-    public static class HttpCookieOAuth2AuthorizationRequestRepository
-            implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
-
-        private static final String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
-        private static final int COOKIE_EXPIRE_SECONDS = 180;
-
-        @Override
-        public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
-            Cookie cookie = WebUtils.getCookie(request, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
-            return cookie != null ? deserialize(cookie) : null;
-        }
-
-        @Override
-        public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest,
-                                             HttpServletRequest request, HttpServletResponse response) {
-            if (authorizationRequest == null) {
-                removeAuthorizationRequestCookie(request, response);
-                return;
-            }
-
-            Cookie cookie = new Cookie(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, serialize(authorizationRequest));
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setMaxAge(COOKIE_EXPIRE_SECONDS);
-            response.addCookie(cookie);
-        }
-
-        @Override
-        public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request, HttpServletResponse response) {
-            OAuth2AuthorizationRequest authRequest = loadAuthorizationRequest(request);
-            if (authRequest != null) {
-                removeAuthorizationRequestCookie(request, response);
-            }
-            return authRequest;
-        }
-
-        private void removeAuthorizationRequestCookie(HttpServletRequest request, HttpServletResponse response) {
-            Cookie cookie = new Cookie(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, "");
-            cookie.setPath("/");
-            cookie.setMaxAge(0);
-            response.addCookie(cookie);
-        }
-
-        private String serialize(OAuth2AuthorizationRequest authorizationRequest) {
-            try {
-                return Base64.getEncoder().encodeToString(
-                        SerializationUtils.serialize(authorizationRequest));
-            } catch (Exception e) {
-                return "";
-            }
-        }
-
-        private OAuth2AuthorizationRequest deserialize(Cookie cookie) {
-            try {
-                return (OAuth2AuthorizationRequest) SerializationUtils.deserialize(
-                        Base64.getDecoder().decode(cookie.getValue()));
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
 }

@@ -16,6 +16,7 @@ import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.enums.UserStatus;
 import shoong.web_backend.domain.user.repository.UserRepository;
+import shoong.web_backend.generator.NickNameGenerator;
 
 @Service
 @RequiredArgsConstructor
@@ -74,12 +75,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             isExist.setUserEmail(oAuth2Response.getEmail());
             isExist.setRole(UserRole.CLIENT);
         } else {
+            String nickname = NickNameGenerator.getRandomNickname();
             User saveUserEntity = User.builder()
                     .userName(username)
                     .name(oAuth2Response.getName())
                     .userEmail(oAuth2Response.getEmail())
                     .role(UserRole.CLIENT)
                     .userStatus(UserStatus.ACTIVE)
+                    .userAlias(nickname)
                     .build();
             userRepository.save(saveUserEntity);
         }
