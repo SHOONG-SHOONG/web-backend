@@ -41,10 +41,12 @@ public class LiveController {
             @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestParam(value = "itemIds", required = false) List<Long> itemIds,
+            @RequestParam(value = "streamKey", required = true) String streamKey,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
         // DTO로 변환
-        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description, imageFile, liveDate, startTime, itemIds);
+        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description,
+                imageFile, liveDate, startTime, itemIds, streamKey);
 
         User user = userRepository.findById(customUserDetails.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
@@ -65,7 +67,6 @@ public class LiveController {
                                                          LocalDate date) {
         return liveService.getLiveScheduledByDate(date);
     }
-
     @GetMapping("/brand/live-onGoing/{brandId}")
     public ResponseEntity<Object> checkLiveOngoingByBrandId(@PathVariable Long brandId) {
         Optional<LiveMainDto> ongoingLiveDto = liveService.getLiveOngoingByBrandId(brandId);
@@ -75,5 +76,17 @@ public class LiveController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No live ongoing for this brand");  // 진행 중이지 않음
         }
+    }
+    // ✅ 방송 제목으로 스트림 키 조회
+    @GetMapping("/stream-key/search")
+    public ResponseEntity<String> getStreamKeyByTitle(@RequestParam("title") String title) {
+        String streamKey = liveService.searchStreamKeyByTitle(title);
+        return ResponseEntity.ok(streamKey);
+    }
+    // ✅ 최신 방송 스트림 키 조회
+    @GetMapping("/stream-key/latest")
+    public ResponseEntity<String> getLatestStreamKey() {
+        String streamKey = liveService.getLatestStreamKey();
+        return ResponseEntity.ok(streamKey);
     }
 }

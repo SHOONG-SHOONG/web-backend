@@ -44,7 +44,6 @@ public class SecurityConfig {
     private final RefreshTokenService refreshTokenService;
     private final RefreshRepository refreshRepository;
     private final UserRepository userRepository;
-
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -80,10 +79,15 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(
-                                List.of("http://192.168.0.26", "http://localhost:3000")
-                        );
 
+                        configuration.setAllowedOriginPatterns(
+                                List.of("https://*.shoong.store", "http://localhost:3000")
+                        );
+                        /*
+                        configuration.setAllowedOrigins(
+                                List.of("https://shoong.store", "http://localhost:3000")
+                        );
+                        */
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -93,23 +97,18 @@ public class SecurityConfig {
                     }
                 }))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(
-                                "/login", "/join", "/logout", "/oauth2-jwt-header",
-                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
-                        ).permitAll()
+                        .requestMatchers(WhiteList.WHITELIST).permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling((exception) -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         }))
-                .addFilterAfter(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
                 // 중복 제거하고 한 번만 설정
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
         return http.build();
     }
-
 }

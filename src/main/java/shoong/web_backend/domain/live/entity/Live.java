@@ -28,6 +28,8 @@ public class Live {
     private String description;
 
     private String imageUrl;
+    // OBS에서 등록하는 스트림 키
+    private String streamKey;
 
     private LocalDate liveDate;
 
