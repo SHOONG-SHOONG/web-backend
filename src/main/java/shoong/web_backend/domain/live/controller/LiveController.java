@@ -89,4 +89,16 @@ public class LiveController {
         String streamKey = liveService.getLatestStreamKey();
         return ResponseEntity.ok(streamKey);
     }
+
+    @Operation(summary = "사용자의 모든 라이브 목록 조회", description = "현재 인증된 사용자의 모든 라이브 방송 목록을 상태 구분 없이 조회합니다.")
+    @GetMapping("/my-lives")
+    public ResponseEntity<List<LiveMainDto>> getAllLivesByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        System.out.println(customUserDetails.getUserId());
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
+
+        List<LiveMainDto> lives = liveService.getAllLivesByUser(user);
+        return ResponseEntity.ok(lives);
+    }
 }

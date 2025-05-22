@@ -35,8 +35,8 @@ public class OrdersService {
     private final RedissonClient redissonClient;
 
     private static final String ORDER_LOCK_PREFIX = "order:lock:";
-    private static final long WAIT_TIME = 10L;
-    private static final long LEASE_TIME = 5L;
+    private static final long WAIT_TIME = 5L;
+    private static final long LEASE_TIME = 3L;
     private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
 
     /**
@@ -52,8 +52,6 @@ public class OrdersService {
         List<Long> sortedItemIds = itemIds.stream().sorted().toList();
 
         Map<Long, RLock> lockMap = new HashMap<>();
-
-
         try {
             for (Long itemId : sortedItemIds) {
                 String lockKey = ORDER_LOCK_PREFIX + itemId;
@@ -89,6 +87,35 @@ public class OrdersService {
         } finally {
             // 획득한 모든 락 해제
             releaseAllLocks(lockMap);
+        }
+    }
+
+    /**
+     * 장바구니 상품으로 주문 생성 (락 없는 버전)
+     */
+    @Transactional
+    public OrdersResponseDto saveOrderWithoutLock(Long userId) {
+        User user = findUserById(userId);
+        Cart cart = findUserCarts(userId);
+        validateCartsNotEmpty(cart);
+
+        try {
+            // 주문 생성 및 처리
+            Orders order = createOrderFromCarts(user, cart);
+            Orders savedOrder = saveOrder(order);
+
+            List<OrderItem> orderItems = savedOrder.getOrderItems();
+            orderItemRepository.saveAll(orderItems);
+
+            // 재고 감소 - 락이 없어 동시성 문제 발생 가능
+            decreaseItemStock(orderItems);
+
+            // 카트 비우기
+            clearUserCart(userId);
+
+            return convertToOrderResponseDto(savedOrder);
+        } catch (Exception e) {
+            throw new RuntimeException("주문 처리 중 오류가 발생했습니다.", e);
         }
     }
 
