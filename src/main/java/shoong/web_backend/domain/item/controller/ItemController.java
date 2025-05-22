@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +37,7 @@ public class ItemController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "아이템 생성 성공")
     })
+    @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createItem(
             @Parameter(description = "아이템 정보", required = true)
@@ -79,6 +81,7 @@ public class ItemController {
     }
     // 상품 수정
     // CRUD: Patch, URI: /item/{itemId}
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{itemId}")
     public ResponseEntity<Void> updateItem(@PathVariable Long itemId,
                                            @RequestBody @Valid ItemUpdateRequestDto updateDto,
@@ -87,6 +90,7 @@ public class ItemController {
         return ResponseEntity.ok().build();
     }
     //상품 삭제
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{itemId}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
         itemService.deleteItem(itemId);
