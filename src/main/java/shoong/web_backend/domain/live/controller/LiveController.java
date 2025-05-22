@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +34,7 @@ public class LiveController {
     private final UserRepository userRepository;
 
     @Operation(summary = "라이브 생성", description = "라이브 방송 생성 API")
+    @PreAuthorize("hasAuthority('STREAMER')")
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LiveCreateResponseDto> createLive(
             @RequestParam("title") String title,
@@ -54,7 +56,6 @@ public class LiveController {
         LiveCreateResponseDto responseDto = liveService.createLive(requestDto, user);
         return ResponseEntity.ok(responseDto);
     }
-
     @GetMapping("/main")
     public ResponseEntity<List<LiveMainDto>> getMainLiveList() {
         List<LiveMainDto> mainLiveList = liveService.getMainLiveList();
@@ -67,6 +68,7 @@ public class LiveController {
                                                          LocalDate date) {
         return liveService.getLiveScheduledByDate(date);
     }
+
     @GetMapping("/brand/live-onGoing/{brandId}")
     public ResponseEntity<Object> checkLiveOngoingByBrandId(@PathVariable Long brandId) {
         Optional<LiveMainDto> ongoingLiveDto = liveService.getLiveOngoingByBrandId(brandId);

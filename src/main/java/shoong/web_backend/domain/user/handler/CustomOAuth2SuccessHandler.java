@@ -66,6 +66,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         // 처음 JWT 발급할 때 이름을 함께 넘긴 후, 로컬 스토리지에 저장한다.
         String encodedName = URLEncoder.encode(name, "UTF-8");
         System.out.println("리다이렉션 정상 실행");
-        response.sendRedirect("http://192.168.0.26/oauth2-jwt-header?name=" + encodedName);
+        response.sendRedirect("http://192.168.0.6/oauth2-jwt-header?name=" + encodedName);
     }
 }

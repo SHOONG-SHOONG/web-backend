@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,8 +35,8 @@ import shoong.web_backend.domain.user.repository.RefreshRepository;
 import shoong.web_backend.domain.user.repository.UserRepository;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
 import shoong.web_backend.domain.user.service.oauth2.CustomOAuth2UserService;
-
 @EnableWebSecurity
+@EnableMethodSecurity  // ✅ 이거 추가!
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -81,7 +82,8 @@ public class SecurityConfig {
                         CorsConfiguration configuration = new CorsConfiguration();
 
                         configuration.setAllowedOriginPatterns(
-                                List.of("https://*.shoong.store", "http://localhost:3000")
+                                List.of("https://shoong.store", "http://192.168.0.6",
+                                        "http://localhost:3000")
                         );
                         /*
                         configuration.setAllowedOrigins(
