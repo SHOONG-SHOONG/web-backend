@@ -30,4 +30,10 @@ public interface LiveRepository extends JpaRepository<Live, Long> {
     List<Live> findAllByLiveDateOrderByLiveStartTimeAsc(LocalDate liveDate);
 
     Optional<Live> findFirstByUserIdAndLiveStatus(Long userId, LiveStatus status);
+    // 제목 + 최신
+    Optional<Live> findFirstByTitleContainingIgnoreCaseOrderByLiveDateDesc(String title);
+
+    // 제목없이 최신
+    Optional<Live> findFirstByOrderByLiveStartTimeDesc();
+
 }

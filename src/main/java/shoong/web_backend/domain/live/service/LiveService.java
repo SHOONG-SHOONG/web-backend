@@ -1,5 +1,6 @@
 package shoong.web_backend.domain.live.service;
 
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class LiveService {
+public class    LiveService {
 
     private final LiveRepository liveRepository;
     private final UserRepository userRepository;
@@ -181,6 +182,20 @@ public class LiveService {
             }
         }
         return Optional.empty();
+    }
+
+    public String searchStreamKeyByTitle(String streamingTitle) {
+        return liveRepository
+                .findFirstByTitleContainingIgnoreCaseOrderByLiveDateDesc(streamingTitle)
+                .map(Live::getStreamKey)
+                .orElseThrow(() -> new NoSuchElementException("해당 제목을 포함하는 방송이 존재하지 않습니다."));
+    }
+
+    public String getLatestStreamKey() {
+        return liveRepository
+                .findFirstByOrderByLiveStartTimeDesc()
+                .map(Live::getStreamKey)
+                .orElseThrow(() -> new NoSuchElementException("가장 최근 방송이 존재하지 않습니다."));
     }
 
 
