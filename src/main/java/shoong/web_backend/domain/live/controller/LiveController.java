@@ -15,6 +15,7 @@ import shoong.web_backend.domain.live.dto.LiveCreateRequestDto;
 import shoong.web_backend.domain.live.dto.LiveCreateResponseDto;
 import shoong.web_backend.domain.live.dto.LiveMainDto;
 import shoong.web_backend.domain.live.dto.LiveScheduledDto;
+import shoong.web_backend.domain.live.dto.VodRequestDto;
 import shoong.web_backend.domain.live.service.LiveService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
@@ -90,5 +91,23 @@ public class LiveController {
     public ResponseEntity<String> getLatestStreamKey() {
         String streamKey = liveService.getLatestStreamKey();
         return ResponseEntity.ok(streamKey);
+    }
+
+    @Operation(summary = "사용자의 모든 라이브 목록 조회", description = "현재 인증된 사용자의 모든 라이브 방송 목록을 상태 구분 없이 조회합니다.")
+    @GetMapping("/my-lives")
+    public ResponseEntity<List<LiveMainDto>> getAllLivesByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        System.out.println(customUserDetails.getUserId());
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
+
+        List<LiveMainDto> lives = liveService.getAllLivesByUser(user);
+        return ResponseEntity.ok(lives);
+    }
+
+    @PostMapping("/vods")
+    public ResponseEntity<Void> saveVOD(@RequestBody VodRequestDto request) {
+        liveService.updateReplayUrlByStreamKey(request.getStreamKey(), request.getVodUrl());
+        return ResponseEntity.ok().build();
     }
 }

@@ -36,4 +36,6 @@ public interface LiveRepository extends JpaRepository<Live, Long> {
     // 제목없이 최신
     Optional<Live> findFirstByOrderByLiveStartTimeDesc();
 
+    List<Live> findAllByUserIdOrderByLiveStartTimeDesc(Long userId);
+    Optional<Live> findTopByStreamKeyOrderByLiveStartTimeDesc(String streamKey);
 }
