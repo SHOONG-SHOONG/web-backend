@@ -82,7 +82,7 @@ public class SecurityConfig {
                         CorsConfiguration configuration = new CorsConfiguration();
 
                         configuration.setAllowedOriginPatterns(
-                                List.of("https://shoong.store", "http://192.168.0.6",
+                                List.of("https://shoong.store", "https://*.shoong.store", "http://192.168.0.6",
                                         "http://localhost:3000")
                         );
                         /*
