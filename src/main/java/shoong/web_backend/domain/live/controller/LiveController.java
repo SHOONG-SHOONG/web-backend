@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,7 @@ import shoong.web_backend.domain.live.dto.LiveCreateRequestDto;
 import shoong.web_backend.domain.live.dto.LiveCreateResponseDto;
 import shoong.web_backend.domain.live.dto.LiveMainDto;
 import shoong.web_backend.domain.live.dto.LiveScheduledDto;
+import shoong.web_backend.domain.live.dto.VodRequestDto;
 import shoong.web_backend.domain.live.service.LiveService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
@@ -33,6 +35,7 @@ public class LiveController {
     private final UserRepository userRepository;
 
     @Operation(summary = "라이브 생성", description = "라이브 방송 생성 API")
+    @PreAuthorize("hasAuthority('STREAMER')")
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LiveCreateResponseDto> createLive(
             @RequestParam("title") String title,
@@ -41,10 +44,12 @@ public class LiveController {
             @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestParam(value = "itemIds", required = false) List<Long> itemIds,
+            @RequestParam(value = "streamKey", required = true) String streamKey,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
         // DTO로 변환
-        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description, imageFile, liveDate, startTime, itemIds);
+        LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description,
+                imageFile, liveDate, startTime, itemIds, streamKey);
 
         User user = userRepository.findById(customUserDetails.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
@@ -52,7 +57,6 @@ public class LiveController {
         LiveCreateResponseDto responseDto = liveService.createLive(requestDto, user);
         return ResponseEntity.ok(responseDto);
     }
-
     @GetMapping("/main")
     public ResponseEntity<List<LiveMainDto>> getMainLiveList() {
         List<LiveMainDto> mainLiveList = liveService.getMainLiveList();
@@ -75,5 +79,35 @@ public class LiveController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No live ongoing for this brand");  // 진행 중이지 않음
         }
+    }
+    // ✅ 방송 제목으로 스트림 키 조회
+    @GetMapping("/stream-key/search")
+    public ResponseEntity<String> getStreamKeyByTitle(@RequestParam("title") String title) {
+        String streamKey = liveService.searchStreamKeyByTitle(title);
+        return ResponseEntity.ok(streamKey);
+    }
+    // ✅ 최신 방송 스트림 키 조회
+    @GetMapping("/stream-key/latest")
+    public ResponseEntity<String> getLatestStreamKey() {
+        String streamKey = liveService.getLatestStreamKey();
+        return ResponseEntity.ok(streamKey);
+    }
+
+    @Operation(summary = "사용자의 모든 라이브 목록 조회", description = "현재 인증된 사용자의 모든 라이브 방송 목록을 상태 구분 없이 조회합니다.")
+    @GetMapping("/my-lives")
+    public ResponseEntity<List<LiveMainDto>> getAllLivesByUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        System.out.println(customUserDetails.getUserId());
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
+
+        List<LiveMainDto> lives = liveService.getAllLivesByUser(user);
+        return ResponseEntity.ok(lives);
+    }
+
+    @PostMapping("/vods")
+    public ResponseEntity<Void> saveVOD(@RequestBody VodRequestDto request) {
+        liveService.updateReplayUrlByStreamKey(request.getStreamKey(), request.getVodUrl());
+        return ResponseEntity.ok().build();
     }
 }

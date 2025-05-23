@@ -4,10 +4,8 @@ package shoong.web_backend.domain.orders.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import shoong.web_backend.domain.orders.dto.OrderCreateRequestDto;
 import shoong.web_backend.domain.orders.dto.OrdersDetailDto;
 import shoong.web_backend.domain.orders.dto.OrdersResponseDto;
 import shoong.web_backend.domain.orders.service.OrdersService;
@@ -24,8 +22,14 @@ public class OrdersController {
 
     // 주문 생성 API
     @PostMapping("/success")
-    public ResponseEntity<OrdersResponseDto> createOrder(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        OrdersResponseDto savedOrder = ordersService.saveOrderWithCartItems(userDetails.getUserId());
+    public ResponseEntity<OrdersResponseDto> createOrder(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OrderCreateRequestDto request) {
+
+        OrdersResponseDto savedOrder = ordersService.saveOrderWithSelectedCartItems(
+                userDetails.getUserId(),
+                request.getSelectedCartIds()
+        );
         return ResponseEntity.ok(savedOrder);
     }
 

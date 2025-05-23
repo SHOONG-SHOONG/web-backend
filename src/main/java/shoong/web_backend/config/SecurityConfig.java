@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,8 +35,8 @@ import shoong.web_backend.domain.user.repository.RefreshRepository;
 import shoong.web_backend.domain.user.repository.UserRepository;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
 import shoong.web_backend.domain.user.service.oauth2.CustomOAuth2UserService;
-
 @EnableWebSecurity
+@EnableMethodSecurity  // ✅ 이거 추가!
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -44,7 +45,6 @@ public class SecurityConfig {
     private final RefreshTokenService refreshTokenService;
     private final RefreshRepository refreshRepository;
     private final UserRepository userRepository;
-
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -80,10 +80,16 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(
-                                List.of("http://192.168.0.26", "http://localhost:3000")
-                        );
 
+                        configuration.setAllowedOriginPatterns(
+                                List.of("https://shoong.store", "http://192.168.0.6",
+                                        "http://localhost:3000")
+                        );
+                        /*
+                        configuration.setAllowedOrigins(
+                                List.of("https://shoong.store", "http://localhost:3000")
+                        );
+                        */
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -93,23 +99,18 @@ public class SecurityConfig {
                     }
                 }))
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(
-                                "/login", "/join", "/logout", "/oauth2-jwt-header",
-                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
-                        ).permitAll()
+                        .requestMatchers(WhiteList.WHITELIST).permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling((exception) -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         }))
-                .addFilterAfter(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
                 // 중복 제거하고 한 번만 설정
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
         return http.build();
     }
-
 }

@@ -35,7 +35,7 @@ public class JWTUtil {
     }
 
      public String getUserAlias(String token){
-         return getPayload(token).get("useAlias", String.class);
+         return getPayload(token).get("userAlias", String.class);
      }
 
     public String getCategory(String token){
@@ -52,7 +52,7 @@ public class JWTUtil {
                 .claim("username", username)
                 .claim("role", role)
                 .claim("userId", userId)  // 👈 userId 추가
-                .claim("userAlias", userAlias) // 👈 userAliaas 추가 2025-05-19
+                .claim("userAlias", userAlias) // 👈 userAlia    s 추가 2025-05-19
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)

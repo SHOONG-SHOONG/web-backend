@@ -21,4 +21,5 @@ public class LiveCreateRequestDto {
     private LocalDate liveDate;
     private LocalDateTime liveStartTime;
     private List<Long> itemIds;
+    private String streamKey; // OBS 스트림 키
 }
