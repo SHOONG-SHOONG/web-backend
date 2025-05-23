@@ -22,6 +22,7 @@ import shoong.web_backend.domain.user.repository.UserRepository;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,37 +41,31 @@ public class OrdersService {
     private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
 
     /**
-     * 장바구니 상품으로 주문 생성
+     * 선택된 장바구니 상품으로 주문 생성
+     * @param userId 사용자 ID
+     * @param selectedCartIds 주문할 장바구니 아이템 ID 목록
      */
     @Transactional
-    public OrdersResponseDto saveOrderWithCartItems(Long userId) {
+    public OrdersResponseDto saveOrderWithSelectedCartItems(Long userId, List<Long> selectedCartIds) {
         User user = findUserById(userId);
-        Cart cart = findUserCarts(userId);
-        validateCartsNotEmpty(cart);
+        List<Cart> selectedCarts = findSelectedCarts(userId, selectedCartIds);
+        validateCartsNotEmpty(selectedCarts);
 
-        Set<Long> itemIds = getItemIdsFromCart(cart);
+        // 선택된 카트에서 아이템 ID 추출 및 정렬 (데드락 방지)
+        Set<Long> itemIds = getItemIdsFromCarts(selectedCarts);
         List<Long> sortedItemIds = itemIds.stream().sorted().toList();
 
         Map<Long, RLock> lockMap = new HashMap<>();
 
-
         try {
-            for (Long itemId : sortedItemIds) {
-                String lockKey = ORDER_LOCK_PREFIX + itemId;
-                RLock lock = redissonClient.getLock(lockKey);
+            // 아이템별 락 획득
+            acquireItemLocks(sortedItemIds, lockMap);
 
-                boolean isLocked = lock.tryLock(WAIT_TIME, LEASE_TIME, TIME_UNIT);
-                if (!isLocked) {
-                    // 락 획득 실패 시 이미 획득한 락을 모두 해제
-                    releaseAllLocks(lockMap);
-                    throw new IllegalStateException("상품 재고 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
-                }
-
-                lockMap.put(itemId, lock);
-            }
+            // 재고 검증
+            validateStockAvailability(selectedCarts);
 
             // 주문 생성 및 처리
-            Orders order = createOrderFromCarts(user, cart);
+            Orders order = createOrderFromSelectedCarts(user, selectedCarts);
             Orders savedOrder = saveOrder(order);
 
             List<OrderItem> orderItems = savedOrder.getOrderItems();
@@ -79,10 +74,11 @@ public class OrdersService {
             // 재고 감소
             decreaseItemStock(orderItems);
 
-            // 카트 비우기
-            clearUserCart(userId);
+            // 선택된 카트 아이템만 제거
+            removeSelectedCartItems(selectedCartIds);
 
             return convertToOrderResponseDto(savedOrder);
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("주문 처리 중 인터럽트가 발생했습니다.", e);
@@ -92,16 +88,24 @@ public class OrdersService {
         }
     }
 
-    private Set<Long> getItemIdsFromCart(Cart cart) {
-        Set<Long> itemIds = new HashSet<>();
+    // ===== 락 관련 헬퍼 메서드 =====
+    private void acquireItemLocks(List<Long> sortedItemIds, Map<Long, RLock> lockMap)
+            throws InterruptedException {
+        for (Long itemId : sortedItemIds) {
+            String lockKey = ORDER_LOCK_PREFIX + itemId;
+            RLock lock = redissonClient.getLock(lockKey);
 
-        // Cart에서 Item을 가져오는 방식에 따라 구현
-        itemIds.add(cart.getItem().getItemId());
+            boolean isLocked = lock.tryLock(WAIT_TIME, LEASE_TIME, TIME_UNIT);
+            if (!isLocked) {
+                // 락 획득 실패 시 이미 획득한 락을 모두 해제
+                releaseAllLocks(lockMap);
+                throw new IllegalStateException("상품 재고 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
+            }
 
-        return itemIds;
+            lockMap.put(itemId, lock);
+        }
     }
 
-    // 획득한 모든 락을 해제하는 메서드
     private void releaseAllLocks(Map<Long, RLock> lockMap) {
         for (RLock lock : lockMap.values()) {
             if (lock.isHeldByCurrentThread()) {
@@ -110,32 +114,65 @@ public class OrdersService {
         }
     }
 
+    // ===== 재고 검증 헬퍼 메서드 =====
+    private void validateStockAvailability(List<Cart> selectedCarts) {
+        for (Cart cart : selectedCarts) {
+            Item item = cart.getItem();
+            int requestedQuantity = cart.getCartQuantity();
+            int availableStock = item.getItemQuantity();
+
+            if (requestedQuantity > availableStock) {
+                throw new IllegalStateException(
+                        String.format("상품 '%s'의 재고가 부족합니다. (요청: %d개, 재고: %d개)",
+                                item.getItemName(), requestedQuantity, availableStock)
+                );
+            }
+        }
+    }
+
+    // ===== 장바구니 관련 헬퍼 메서드 =====
+    private List<Cart> findSelectedCarts(Long userId, List<Long> selectedCartIds) {
+        List<Cart> carts = cartRepository.findByUserIdAndCartIdIn(userId, selectedCartIds);
+
+        // 요청된 카트 ID와 실제 조회된 카트 ID 비교
+        if (carts.size() != selectedCartIds.size()) {
+            throw new NotFoundException("일부 장바구니 항목을 찾을 수 없습니다.");
+        }
+
+        return carts;
+    }
+
+    private void validateCartsNotEmpty(List<Cart> carts) {
+        if (carts == null || carts.isEmpty()) {
+            throw new IllegalStateException("장바구니가 비어있습니다.");
+        }
+    }
+
+    private Set<Long> getItemIdsFromCarts(List<Cart> carts) {
+        return carts.stream()
+                .map(cart -> cart.getItem().getItemId())
+                .collect(Collectors.toSet());
+    }
+
+    private void removeSelectedCartItems(List<Long> selectedCartIds) {
+        cartRepository.deleteByCartIdIn(selectedCartIds);
+    }
+
     // ===== 사용자 관련 헬퍼 메서드 =====
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 userID의 유저 조회를 실패하였습니다."));
     }
 
-    // ===== 장바구니 관련 헬퍼 메서드 =====
-    private Cart findUserCarts(Long userId) {
-        return cartRepository.findTopByUserIdOrderByCartIdDesc(userId);
-    }
-
-    private void validateCartsNotEmpty(Cart cart) {
-        if (cart == null) {
-            throw new IllegalStateException("장바구니가 비어있습니다.");
-        }
-    }
-
-    private void clearUserCart(Long userId) {
-        cartRepository.deleteAllByUserId(userId);
-    }
-
     // ===== 주문 관련 헬퍼 메서드 =====
-    private Orders createOrderFromCarts(User user,Cart carts) {
+    private Orders createOrderFromSelectedCarts(User user, List<Cart> selectedCarts) {
         Orders order = Orders.of(user);
-        OrderItem orderItem = createOrderItemFromCart(order, carts);
-        order.addOrderItem(orderItem);
+
+        for (Cart cart : selectedCarts) {
+            OrderItem orderItem = createOrderItemFromCart(order, cart);
+            order.addOrderItem(orderItem);
+        }
+
         return order;
     }
 
@@ -159,9 +196,17 @@ public class OrdersService {
     }
 
     private void decreaseItemStock(List<OrderItem> orderItems) {
-        for( OrderItem orderItem : orderItems ) {
+        for (OrderItem orderItem : orderItems) {
             Item item = orderItem.getItem();
-            item.setItemQuantity(item.getItemQuantity() - orderItem.getOrderItemQuantity());
+            int newQuantity = item.getItemQuantity() - orderItem.getOrderItemQuantity();
+
+            if (newQuantity < 0) {
+                throw new IllegalStateException(
+                        String.format("상품 '%s'의 재고가 부족합니다.", item.getItemName())
+                );
+            }
+
+            item.setItemQuantity(newQuantity);
             itemRepository.save(item);
         }
     }
