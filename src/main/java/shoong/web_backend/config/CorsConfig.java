@@ -14,7 +14,7 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("https://shoong.store", "http://localhost:3000"
+        config.setAllowedOriginPatterns(List.of("https://shoong.store", "https://*.shoong.store", "http://localhost:3000"
                 , "http://192.168.0.6"));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
