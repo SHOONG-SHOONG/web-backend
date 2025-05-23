@@ -15,6 +15,7 @@ import shoong.web_backend.domain.live.dto.LiveCreateRequestDto;
 import shoong.web_backend.domain.live.dto.LiveCreateResponseDto;
 import shoong.web_backend.domain.live.dto.LiveMainDto;
 import shoong.web_backend.domain.live.dto.LiveScheduledDto;
+import shoong.web_backend.domain.live.dto.VodRequestDto;
 import shoong.web_backend.domain.live.service.LiveService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
@@ -102,5 +103,11 @@ public class LiveController {
 
         List<LiveMainDto> lives = liveService.getAllLivesByUser(user);
         return ResponseEntity.ok(lives);
+    }
+
+    @PostMapping("/vods")
+    public ResponseEntity<Void> saveVOD(@RequestBody VodRequestDto request) {
+        liveService.updateReplayUrlByStreamKey(request.getStreamKey(), request.getVodUrl());
+        return ResponseEntity.ok().build();
     }
 }

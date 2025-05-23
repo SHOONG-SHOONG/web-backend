@@ -6,6 +6,6 @@ public class WhiteList {
             "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**",
             "/live/main", "/live/scheduled", "/live/brand/live-onGoing",
             "/live/stream-key/search", "/live/stream-key/latest",
-            "/item", "/item/search", "/brand/*", "/item/*"
+            "/item", "/item/search", "/brand/*", "/item/*", "/live/vods"
     };
 }

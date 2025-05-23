@@ -28,10 +28,12 @@ public class Live {
     private String description;
 
     private String imageUrl;
-    // OBS에서 등록하는 스트림 키
+    // OBS에서 등록하는 스트림 키(브랜드명)
     private String streamKey;
 
     private LocalDate liveDate;
+    // 다시보기 URL
+    private String replayURL;
 
     @Enumerated(EnumType.STRING)
     private LiveStatus liveStatus;

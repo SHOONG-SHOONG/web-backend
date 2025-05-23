@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class    LiveService {
+public class LiveService {
 
     private final LiveRepository liveRepository;
     private final UserRepository userRepository;
@@ -246,5 +246,13 @@ public class    LiveService {
                 .orElseThrow(() -> new NoSuchElementException("가장 최근 방송이 존재하지 않습니다."));
     }
 
+    @Transactional
+    public void updateReplayUrlByStreamKey(String streamKey, String vodUrl) {
+        Live live = liveRepository.findTopByStreamKeyOrderByLiveStartTimeDesc(streamKey)
+                .orElseThrow(() -> new NoSuchElementException("해당 streamKey로 된 라이브가 존재하지 않습니다."));
+        // 다시보기 url저장
+        live.setReplayURL(vodUrl);
+        liveRepository.save(live);
+    }
 
 }
