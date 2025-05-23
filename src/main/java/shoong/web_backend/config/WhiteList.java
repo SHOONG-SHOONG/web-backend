@@ -7,5 +7,6 @@ public class WhiteList {
             "/live/main", "/live/scheduled", "/live/brand/live-onGoing",
             "/live/stream-key/search", "/live/stream-key/latest",
             "/item", "/item/search", "/brand/*", "/item/*", "/live/vods"
+            ,"/wishlist/toggle"
     };
 }
