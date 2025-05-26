@@ -46,7 +46,7 @@ public class OrdersService {
      * @param selectedCartIds 주문할 장바구니 아이템 ID 목록
      */
     @Transactional
-    public OrdersResponseDto saveOrderWithSelectedCartItems(Long userId, List<Long> selectedCartIds) {
+    public OrdersResponseDto createOrderDraft(Long userId, List<Long> selectedCartIds) {
         User user = findUserById(userId);
         List<Cart> selectedCarts = findSelectedCarts(userId, selectedCartIds);
         validateCartsNotEmpty(selectedCarts);
@@ -62,7 +62,7 @@ public class OrdersService {
             acquireItemLocks(sortedItemIds, lockMap);
 
             // 재고 검증
-            validateStockAvailability(selectedCarts);
+            validateStockAvailabilityWithCart(selectedCarts);
 
             // 주문 생성 및 처리
             Orders order = createOrderFromSelectedCarts(user, selectedCarts);
@@ -70,12 +70,6 @@ public class OrdersService {
 
             List<OrderItem> orderItems = savedOrder.getOrderItems();
             orderItemRepository.saveAll(orderItems);
-
-            // 재고 감소
-            decreaseItemStock(orderItems);
-
-            // 선택된 카트 아이템만 제거
-            removeSelectedCartItems(selectedCartIds);
 
             return convertToOrderResponseDto(savedOrder);
 
@@ -87,6 +81,48 @@ public class OrdersService {
             releaseAllLocks(lockMap);
         }
     }
+
+    @Transactional
+    public OrdersResponseDto finalizeOrder(Long userId, Long orderId) {
+        Orders order = findOrderById(orderId);
+//        validateUserOwnership(order, userId);
+
+        List<OrderItem> orderItems = order.getOrderItems();
+
+        List<Long> itemIds = orderItems.stream()
+                .map(oi -> oi.getItem().getItemId())
+                .distinct()
+                .sorted()
+                .toList();
+
+        Map<Long, RLock> lockMap = new HashMap<>();
+        try {
+            acquireItemLocks(itemIds, lockMap);
+            validateStockAvailabilityWithOrder(orderItems); // ✅ 재확인 안전망
+
+            decreaseItemStock(orderItems); // ✅ 실제 차감
+            removeSelectedCartItems(userId, order);
+
+            return convertToOrderResponseDto(order);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("주문 확정 중 인터럽트 발생", e);
+        } finally {
+            releaseAllLocks(lockMap);
+        }
+    }
+
+    private Orders findOrderById(Long orderId) {
+        return ordersRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("해당 orderId의 주문 조회를 실패했습니다."));
+    }
+
+//    private void validateUserOwnership(Orders order, Long userId) {
+//        if (!order.getUser().getId().equals(userId)) {
+//            throw new UnauthorizedAccessException("해당 주문에 접근할 권한이 없습니다.");
+//        }
+//    }
 
     // ===== 락 관련 헬퍼 메서드 =====
     private void acquireItemLocks(List<Long> sortedItemIds, Map<Long, RLock> lockMap)
@@ -115,10 +151,25 @@ public class OrdersService {
     }
 
     // ===== 재고 검증 헬퍼 메서드 =====
-    private void validateStockAvailability(List<Cart> selectedCarts) {
+    private void validateStockAvailabilityWithCart(List<Cart> selectedCarts) {
         for (Cart cart : selectedCarts) {
             Item item = cart.getItem();
             int requestedQuantity = cart.getCartQuantity();
+            int availableStock = item.getItemQuantity();
+
+            if (requestedQuantity > availableStock) {
+                throw new IllegalStateException(
+                        String.format("상품 '%s'의 재고가 부족합니다. (요청: %d개, 재고: %d개)",
+                                item.getItemName(), requestedQuantity, availableStock)
+                );
+            }
+        }
+    }
+
+    private void validateStockAvailabilityWithOrder(List<OrderItem> orderItems) {
+        for (OrderItem orderItem : orderItems) {
+            Item item = orderItem.getItem();
+            int requestedQuantity = orderItem.getOrderItemQuantity();
             int availableStock = item.getItemQuantity();
 
             if (requestedQuantity > availableStock) {
@@ -154,8 +205,21 @@ public class OrdersService {
                 .collect(Collectors.toSet());
     }
 
-    private void removeSelectedCartItems(List<Long> selectedCartIds) {
-        cartRepository.deleteByCartIdIn(selectedCartIds);
+    private void removeSelectedCartItems(Long userId, Orders order) {
+        // 주문에서 사용된 itemId들 추출
+        Set<Long> orderedItemIds = order.getOrderItems().stream()
+                .map(oi -> oi.getItem().getItemId())
+                .collect(Collectors.toSet());
+
+        // 내 카트 목록 조회
+        List<Cart> myCarts = cartRepository.findByUserId(userId);
+
+        // 주문된 itemId와 일치하는 카트만 필터링
+        List<Cart> cartsToRemove = myCarts.stream()
+                .filter(cart -> orderedItemIds.contains(cart.getItem().getItemId()))
+                .toList();
+
+        cartRepository.deleteAll(cartsToRemove);
     }
 
     // ===== 사용자 관련 헬퍼 메서드 =====
@@ -235,56 +299,3 @@ public class OrdersService {
                 .toList();
     }
 }
-
-
-
-//@Service
-//@RequiredArgsConstructor
-//@Builder
-//public class OrdersService {
-//
-//    private final OrdersRepository ordersRepository;
-//    private final CartRepository cartRepository;
-//    private final UserRepository userRepository;
-//
-//    @Transactional
-//    public OrdersResponseDto saveOrderWithCartItems(Long userId) {
-//        // 1. 유저 장바구니 조회
-//        List<Cart> carts = cartRepository.findAllByUserId(userId);
-//        User getUser = userRepository.findById(userId)
-//                .orElseThrow(() -> new NotFoundException("해당 userID의 유저 조회를 실패하였습니다."));
-//
-//        if (carts.isEmpty()) {
-//            throw new IllegalStateException("장바구니가 비어있습니다.");
-//        }
-//
-//        Orders order = Orders.of(getUser);
-//
-//        // 3. 장바구니 -> OrderItem 변환해서 Orders에 추가
-//        for (Cart cart : carts) {
-//            OrderItem orderItem = OrderItem.of(
-//                    order,
-//                    cart.getItem(),
-//                    cart.getCartQuantity(),
-//                    (long) (cart.getItem().getPrice() * cart.getCartQuantity() * cart.getItem().getDiscountRate())
-//                    // 상품 가격 기준
-//            );
-//            order.addOrderItem(orderItem);
-//        }
-//
-//        // 4. Orders 저장 (OrderItem은 cascade로 같이 저장됨)
-//        Orders savedOrder = ordersRepository.save(order);
-//
-//        // 5. 장바구니 비우기
-//        cartRepository.deleteAllByUserId(userId);
-//
-//        return OrdersResponseDto.builder()
-//                .orderId(savedOrder.getOrderId())
-//                .totalPrice(savedOrder.getTotalPrice())
-//                .orderDate(savedOrder.getOrderDate())
-//                .orderItems(savedOrder.getOrderItems().stream()
-//                        .map(OrderItemDto::from)
-//                        .toList())
-//                .build();
-//    }
-//}
