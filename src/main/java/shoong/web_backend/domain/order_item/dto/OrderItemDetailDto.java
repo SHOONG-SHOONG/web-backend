@@ -10,6 +10,7 @@ public class OrderItemDetailDto {
     private Long orderItemId;
     private Long orderId;
     private Long itemId;
+    private String imageUrl;
     private String itemName;
     private Integer quantity;
     private Long price;
@@ -19,6 +20,7 @@ public class OrderItemDetailDto {
                 .orderItemId(orderItem.getOrderItemId())
                 .orderId(orderItem.getOrder().getOrderId())
                 .itemId(orderItem.getItem().getItemId())
+                .imageUrl(orderItem.getItem().getItemImages().get(0).getUrl())
                 .itemName(orderItem.getItem().getItemName())
                 .quantity(orderItem.getOrderItemQuantity())
                 .price(orderItem.getOrderItemPrice())
