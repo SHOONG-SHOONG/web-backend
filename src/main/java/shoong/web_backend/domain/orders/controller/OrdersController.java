@@ -41,7 +41,8 @@ public class OrdersController {
 
         OrdersResponseDto finalizedOrder = ordersService.finalizeOrder(
                 userDetails.getUserId(),
-                request.getOrderId()
+                request.getOrderId(),
+                request.getOrderAddress()
         );
         return ResponseEntity.ok(finalizedOrder);
     }

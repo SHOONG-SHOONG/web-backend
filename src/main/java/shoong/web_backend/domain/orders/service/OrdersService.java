@@ -83,7 +83,7 @@ public class OrdersService {
     }
 
     @Transactional
-    public OrdersResponseDto finalizeOrder(Long userId, Long orderId) {
+    public OrdersResponseDto finalizeOrder(Long userId, Long orderId, String orderAddress) {
         Orders order = findOrderById(orderId);
 //        validateUserOwnership(order, userId);
 
@@ -102,9 +102,9 @@ public class OrdersService {
 
             decreaseItemStock(orderItems); // ✅ 실제 차감
             removeSelectedCartItems(userId, order);
+            order.setOrderAddress(orderAddress);
 
             return convertToOrderResponseDto(order);
-
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("주문 확정 중 인터럽트 발생", e);
