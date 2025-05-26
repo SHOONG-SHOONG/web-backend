@@ -253,7 +253,7 @@ public class OrdersService {
     private Long calculateOrderItemPrice(Cart cart) {
         return (long) (cart.getItem().getPrice() *
                 cart.getCartQuantity() *
-                cart.getItem().getDiscountRate());
+                (1 - cart.getItem().getDiscountRate()));
     }
 
     private Orders saveOrder(Orders order) {
