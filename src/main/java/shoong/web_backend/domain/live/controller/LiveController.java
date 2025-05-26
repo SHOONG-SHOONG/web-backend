@@ -57,10 +57,17 @@ public class LiveController {
         LiveCreateResponseDto responseDto = liveService.createLive(requestDto, user);
         return ResponseEntity.ok(responseDto);
     }
+
     @GetMapping("/main")
-    public ResponseEntity<List<LiveMainDto>> getMainLiveList() {
-        List<LiveMainDto> mainLiveList = liveService.getMainLiveList();
+    public ResponseEntity<LiveMainDto> getMainLiveList() {
+        LiveMainDto mainLiveList = liveService.getOngoingLiveMainDto();
         return ResponseEntity.ok(mainLiveList);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<LiveMainDto>> getCompletedLiveList() {
+        List<LiveMainDto> completedLiveList = liveService.getCompLiveList();
+        return ResponseEntity.ok(completedLiveList);
     }
 
     @Description("date 형식 예시 : 2025-05-01")

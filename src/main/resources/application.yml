@@ -32,7 +32,7 @@ spring:
         registration:
           kakao:
             client-id: ${REST_API_KEY}
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            redirect-uri: https://api.shoong.store/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             scope:
