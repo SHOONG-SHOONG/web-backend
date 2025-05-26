@@ -67,5 +67,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String encodedName = URLEncoder.encode(name, "UTF-8");
         System.out.println("리다이렉션 정상 실행");
         response.sendRedirect("https://shoong.store/oauth2-jwt-header?name=" + encodedName);
+
     }
 }

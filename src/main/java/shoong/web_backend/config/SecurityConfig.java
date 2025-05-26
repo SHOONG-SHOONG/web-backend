@@ -88,6 +88,7 @@ public class SecurityConfig {
                                 List.of("https://shoong.store"
                                         , "https://*.shoong.store",
                                         "http://192.168.0.6",
+
                                         "http://localhost:3000")
                         );
                         /*
@@ -110,6 +111,7 @@ public class SecurityConfig {
                 .exceptionHandling(
                         (exception) -> exception
                                 .authenticationEntryPoint(customAuthenticationEntryPoint) )
+
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
                 // 중복 제거하고 한 번만 설정
@@ -124,3 +126,4 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         })
  */
+

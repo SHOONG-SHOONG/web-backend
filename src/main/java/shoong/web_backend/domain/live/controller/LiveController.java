@@ -58,7 +58,6 @@ public class LiveController {
         return ResponseEntity.ok(responseDto);
     }
 
-
     @GetMapping("/main")
     public ResponseEntity<LiveMainDto> getMainLiveList() {
         LiveMainDto mainLiveList = liveService.getOngoingLiveMainDto();
