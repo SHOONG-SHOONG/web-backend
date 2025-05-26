@@ -1,10 +1,7 @@
 package shoong.web_backend.domain.orders.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.user.entity.User;
 
@@ -15,6 +12,7 @@ import java.util.List;
 @Entity
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "orders")
@@ -44,6 +42,7 @@ public class Orders {
     public static Orders of(User user) {
         return Orders.builder()
                 .user(user)
+                .orderAddress(user.getUserAddress())
                 .totalPrice(0L)
                 .orderDate(LocalDateTime.now())
                 .build();
