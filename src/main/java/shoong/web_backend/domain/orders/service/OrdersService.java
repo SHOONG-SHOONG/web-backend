@@ -5,7 +5,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.webjars.NotFoundException;
 import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
@@ -23,6 +22,7 @@ import shoong.web_backend.domain.user.repository.UserRepository;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import shoong.web_backend.exception.NotFoundException;
 
 @Service
 @RequiredArgsConstructor
