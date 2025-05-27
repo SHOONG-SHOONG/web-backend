@@ -9,10 +9,10 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class OrderCreateRequestDto {
+public class OrdersCreateRequestDto {
     private List<Long> selectedCartIds;
 
-    public OrderCreateRequestDto(List<Long> selectedCartIds) {
+    public OrdersCreateRequestDto(List<Long> selectedCartIds) {
         this.selectedCartIds = selectedCartIds;
     }
 }
