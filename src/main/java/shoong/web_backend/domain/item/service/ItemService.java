@@ -122,7 +122,7 @@ public class ItemService {
                 .category(dto.getCategory())
                 .createdAt(dto.getCreatedAt())
                 .discountExpiredAt(dto.getDiscountExpiredAt())
-                .status(ItemStatus.ON_SALE)
+                .status(ItemStatus.PENDING)
                 .build();
     }
 
