@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class UserDTO {
-    private Long brandId;
+    private String brandName;
     private String userEmail;
     private String userPassword;      // 필요에 따라 제외 가능
     private String userName;
@@ -19,7 +19,5 @@ public class UserDTO {
     private String role;
     private String registrationNumber;
     private String userStatus;
-    private String accessToken;
-    private Long kakaoId;
 
 }
