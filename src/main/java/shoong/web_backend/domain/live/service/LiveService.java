@@ -103,6 +103,32 @@ public class LiveService {
         );
     }
 
+
+    @Transactional(readOnly = true)
+    public LiveMainDto getOngoingLiveMainDto() {
+        Live live = liveRepository.findFirstByLiveStatusOrderByLiveStartTimeAsc(LiveStatus.ONGOING)
+                .orElseThrow(() -> new IllegalStateException("진행 중인 라이브가 없습니다."));
+
+        // LiveItem은 여러 개일 수 있으므로 하나만 선택
+        LiveItem firstItem = live.getLiveItems().isEmpty() ? null : live.getLiveItems().get(0);
+
+        return LiveMainDto.builder()
+                .id(live.getId())
+                .title(live.getTitle())
+                .imageUrl(live.getImageUrl())
+                .status(live.getLiveStatus())
+                .itemName(firstItem != null ? firstItem.getItem().getItemName() : null)
+                .price(firstItem != null ? firstItem.getItem().getPrice() : null)
+                .discountRate(firstItem != null ? firstItem.getItem().getDiscountRate() : null)
+                .itemImageUrl(firstItem != null ? firstItem.getItem().getItemImages().get(0).getUrl() : null)
+                .build();
+    }
+
+
+
+
+
+
     @Transactional(readOnly = true)
     public List<LiveMainDto> getMainLiveList() {
         List<LiveMainDto> result = new ArrayList<>();
@@ -244,6 +270,67 @@ public class LiveService {
                 .findFirstByOrderByLiveStartTimeDesc()
                 .map(Live::getStreamKey)
                 .orElseThrow(() -> new NoSuchElementException("가장 최근 방송이 존재하지 않습니다."));
+
+    }
+
+    @Transactional
+    public void updateReplayUrlByStreamKey(String streamKey, String vodUrl) {
+        Live live = liveRepository.findTopByStreamKeyOrderByLiveStartTimeDesc(streamKey)
+                .orElseThrow(() -> new NoSuchElementException("해당 streamKey로 된 라이브가 존재하지 않습니다."));
+        // 다시보기 url저장
+        live.setReplayURL(vodUrl);
+        liveRepository.save(live);
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public List<LiveMainDto> getCompLiveList() {
+        List<LiveMainDto> result = new ArrayList<>();
+
+        // 완료된 라이브 중 최근 4개 가져오기
+        List<Live> completedLives = liveRepository
+                .findTopNByLiveStatusOrderByLiveEndTimeDesc(LiveStatus.COMPLETED, 4);
+
+        for (Live live : completedLives) {
+            // 첫 번째 관련 LiveItem 가져오기
+            Optional<LiveItem> firstLiveItemOpt = liveItemRepository
+                    .findFirstByLiveIdOrderByIdAsc(live.getId());
+
+            // 기본값 처리
+            String itemName = null;
+            Long price = null;
+            Double discountRate = null;
+            String itemImageUrl = null;
+
+            if (firstLiveItemOpt.isPresent()) {
+                Item item = firstLiveItemOpt.get().getItem();
+                if (item != null) {
+                    itemName = item.getItemName();
+                    price = item.getPrice();
+                    discountRate = item.getDiscountRate();
+
+                    if (item.getItemImages() != null && !item.getItemImages().isEmpty()) {
+                        itemImageUrl = item.getItemImages().get(0).getUrl();
+                    }
+                }
+            }
+
+            // DTO 생성 및 추가
+            result.add(new LiveMainDto(
+                    live.getId(),
+                    live.getTitle(),
+                    live.getImageUrl(),
+                    itemName,
+                    price,
+                    discountRate,
+                    itemImageUrl,
+                    live.getLiveStatus()
+            ));
+        }
+
+        return result;
+
     }
 
     @Transactional

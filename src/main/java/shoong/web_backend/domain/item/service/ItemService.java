@@ -1,6 +1,7 @@
 package shoong.web_backend.domain.item.service;// example
 
 import jakarta.validation.Valid;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -10,7 +11,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.webjars.NotFoundException;
 import shoong.web_backend.domain.brand.entity.Brand;
 import shoong.web_backend.domain.brand.repository.BrandRepository;
 import shoong.web_backend.domain.item.condition.ItemSearchCondition;
@@ -25,6 +25,8 @@ import shoong.web_backend.domain.item_image.service.ItemImageService;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
+import shoong.web_backend.exception.NotFoundException;
+
 @Service
 @RequiredArgsConstructor
 public class ItemService {
@@ -42,6 +44,17 @@ public class ItemService {
 
         saveItemWithImages(item, imageFiles);
     }
+    // 판매자의 상품 목록
+    @Transactional(readOnly = true)
+    public List<ItemResponseDto> getAdminItemList(Long userId) {
+        User user = findUserById(userId);
+        Brand brand = findBrandByUser(user);
+        List<Item> items = itemRepository.findByBrand_BrandId(brand.getBrandId());
+        return items.stream()
+                .map(this::convertToItemResponseDto)
+                .collect(Collectors.toList()); // ✅ 여기를 수정
+    }
+
 
     // 아이템 상세 조회
     @Transactional(readOnly = true)
