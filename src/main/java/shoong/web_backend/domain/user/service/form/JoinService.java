@@ -63,7 +63,7 @@ public class JoinService {
                     .registrationNumber(joinDto.getRegistrationNumber())
                     .userAddress(joinDto.getUserAddress())
                     .role(UserRole.STREAMER)  // 기본값 USER, 필요시 ADMIN도 가능
-                    .userStatus(UserStatus.ACTIVE)  // 기본값 ACTIVE로 가정
+                    .userStatus(UserStatus.PENDING)  // 기본값 PENDING 으로 지정 , 승인 대기
                     .userAlias(aliasToSet)
                     .build();
 
