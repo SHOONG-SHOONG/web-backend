@@ -31,12 +31,12 @@ public class TestController {
         User user = userOptional.get();
 
         UserDTO userDTO = UserDTO.builder()
-                .brandName(user.getBrand().getBrandName())
+                .brandName(user.getBrand() != null ? user.getBrand().getBrandName() : null)
                 .userEmail(user.getUserEmail())
                 .userName(user.getName())
                 .userPhone(user.getUserPhone())
                 .bdate(user.getBirthDay())
-                .registrationNumber(user.getRegistrationNumber())
+                .registrationNumber(user.getRegistrationNumber() != null ? user.getRegistrationNumber() : null)
                 .userStatus(user.getUserStatus().name())
                 .build();
 
