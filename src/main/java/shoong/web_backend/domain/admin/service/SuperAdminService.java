@@ -7,6 +7,7 @@ import shoong.web_backend.domain.admin.dto.AdminUserDto;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.item.repository.ItemRepository;
+import shoong.web_backend.domain.item_image.entity.ItemImage;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.enums.UserStatus;
@@ -120,6 +121,11 @@ public class SuperAdminService {
                 .createdAt(item.getCreatedAt())
                 .discountExpiredAt(item.getDiscountExpiredAt())
                 .status(item.getStatus())
+                .imageUrls(
+                        item.getItemImages().stream()
+                                .map(ItemImage::getUrl)
+                                .collect(Collectors.toList())
+                )
                 .brandId(item.getBrand() != null ? item.getBrand().getBrandId() : null)
                 .brandName(item.getBrand().getBrandName())
                 .build();
