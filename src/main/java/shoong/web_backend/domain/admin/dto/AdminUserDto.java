@@ -21,6 +21,4 @@ public class AdminUserDto {
     private String registrationNumber;
     private UserStatus userStatus;
     private String userAddress;
-    private Long brandId;
-    private String brandName;
 }

@@ -104,8 +104,6 @@ public class SuperAdminService {
                 .registrationNumber(user.getRegistrationNumber())
                 .userStatus(user.getUserStatus())
                 .userAddress(user.getUserAddress())
-                .brandId(user.getBrand() != null ? user.getBrand().getBrandId() : null)
-                .brandName(user.getBrand().getBrandName())
                 .build();
     }
 
