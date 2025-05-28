@@ -5,6 +5,7 @@ import lombok.Data;
 import shoong.web_backend.domain.item.enums.ItemStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -20,6 +21,7 @@ public class AdminItemDto {
     private LocalDateTime createdAt;
     private LocalDateTime discountExpiredAt;
     private ItemStatus status;
+    private List<String> imageUrls;
     private Long brandId;
     private String brandName;
 }
