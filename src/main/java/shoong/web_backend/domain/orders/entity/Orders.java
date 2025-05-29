@@ -2,7 +2,9 @@ package shoong.web_backend.domain.orders.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
+import shoong.web_backend.domain.orders.enums.OrderStatus;
 import shoong.web_backend.domain.user.entity.User;
 
 import java.time.LocalDateTime;
@@ -39,12 +41,16 @@ public class Orders {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
     public static Orders of(User user) {
         return Orders.builder()
                 .user(user)
                 .orderAddress(user.getUserAddress())
                 .totalPrice(0L)
                 .orderDate(LocalDateTime.now())
+                .orderStatus(OrderStatus.CREATED)
                 .build();
     }
 

@@ -15,6 +15,7 @@ import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
 import shoong.web_backend.domain.orders.dto.OrdersDetailDto;
 import shoong.web_backend.domain.orders.dto.OrdersResponseDto;
 import shoong.web_backend.domain.orders.entity.Orders;
+import shoong.web_backend.domain.orders.enums.OrderStatus;
 import shoong.web_backend.domain.orders.repository.OrdersRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.repository.UserRepository;
@@ -105,11 +106,13 @@ public class OrdersService {
             removeSelectedCartItems(userId, order);
             order.setOrderAddress(orderAddress);
 
+            order.setOrderStatus(OrderStatus.PAID);
             return convertToOrderResponseDto(order);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("주문 확정 중 인터럽트 발생", e);
         } finally {
+            order.setOrderStatus(OrderStatus.FAILED);
             releaseAllLocks(lockMap);
         }
     }
@@ -231,6 +234,11 @@ public class OrdersService {
 
     // ===== 주문 관련 헬퍼 메서드 =====
     private Orders createOrderFromSelectedCarts(User user, List<Cart> selectedCarts) {
+        // 기존의 CREATED 상태 주문이 있다면 삭제
+        ordersRepository.findByUserIdAndOrderStatus(user.getId(), OrderStatus.CREATED)
+                .ifPresent(ordersRepository::delete);  // cascade 설정이 되어있다면 OrderItem도 함께 삭제됨
+
+        // 새로운 주문 생성
         Orders order = Orders.of(user);
 
         for (Cart cart : selectedCarts) {
@@ -293,8 +301,11 @@ public class OrdersService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrdersDetailDto> findOrdersByUserId(Long userId) {
-        List<Orders> ordersList = ordersRepository.findByUserIdOrderByOrderDateDesc(userId);
+    public List<OrdersDetailDto> findOrdersByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus) {
+        List<Orders> ordersList = ordersRepository.findByUserIdAndOrderStatus(userId, orderStatus)
+                .stream()
+                .toList();
+
         return ordersList.stream()
                 .map(OrdersDetailDto::from)
                 .toList();

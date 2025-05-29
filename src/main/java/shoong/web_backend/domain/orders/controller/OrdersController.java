@@ -9,6 +9,7 @@ import shoong.web_backend.domain.orders.dto.OrdersCreateRequestDto;
 import shoong.web_backend.domain.orders.dto.OrdersDetailDto;
 import shoong.web_backend.domain.orders.dto.OrdersResponseDto;
 import shoong.web_backend.domain.orders.dto.OrdersSuccessRequestDto;
+import shoong.web_backend.domain.orders.enums.OrderStatus;
 import shoong.web_backend.domain.orders.service.OrdersService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 
@@ -47,9 +48,15 @@ public class OrdersController {
         return ResponseEntity.ok(finalizedOrder);
     }
 
-    @GetMapping("/list")
-    public ResponseEntity<List<OrdersDetailDto>> getOrderList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<OrdersDetailDto> orderList = ordersService.findOrdersByUserId(userDetails.getUserId());
+    @GetMapping("/list/paid")
+    public ResponseEntity<List<OrdersDetailDto>> getPaidOrderList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<OrdersDetailDto> orderList = ordersService.findOrdersByUserIdAndOrderStatus(userDetails.getUserId(), OrderStatus.PAID);
+        return ResponseEntity.ok(orderList);
+    }
+
+    @GetMapping("/list/pending")
+    public ResponseEntity<List<OrdersDetailDto>> getPendingOrderList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<OrdersDetailDto> orderList = ordersService.findOrdersByUserIdAndOrderStatus(userDetails.getUserId(), OrderStatus.CREATED);
         return ResponseEntity.ok(orderList);
     }
 }
