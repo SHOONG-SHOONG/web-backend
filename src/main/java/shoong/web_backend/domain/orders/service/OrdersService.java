@@ -9,11 +9,10 @@ import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
-import shoong.web_backend.domain.order_item.dto.OrderItemDto;
+import shoong.web_backend.domain.order_item.dto.OrderItemDetailDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
 import shoong.web_backend.domain.orders.dto.OrdersDetailDto;
-import shoong.web_backend.domain.orders.dto.OrdersResponseDto;
 import shoong.web_backend.domain.orders.entity.Orders;
 import shoong.web_backend.domain.orders.enums.OrderStatus;
 import shoong.web_backend.domain.orders.repository.OrdersRepository;
@@ -48,7 +47,7 @@ public class OrdersService {
      * @param selectedCartIds 주문할 장바구니 아이템 ID 목록
      */
     @Transactional
-    public OrdersResponseDto createOrderDraft(Long userId, List<Long> selectedCartIds) {
+    public OrdersDetailDto createOrderDraft(Long userId, List<Long> selectedCartIds) {
         User user = findUserById(userId);
         List<Cart> selectedCarts = findSelectedCarts(userId, selectedCartIds);
         validateCartsNotEmpty(selectedCarts);
@@ -85,7 +84,7 @@ public class OrdersService {
     }
 
     @Transactional
-    public OrdersResponseDto finalizeOrder(Long userId, Long orderId, String orderAddress) {
+    public OrdersDetailDto finalizeOrder(Long userId, Long orderId, String orderAddress) {
         Orders order = findOrderById(orderId);
 //        validateUserOwnership(order, userId);
 
@@ -109,10 +108,10 @@ public class OrdersService {
             order.setOrderStatus(OrderStatus.PAID);
             return convertToOrderResponseDto(order);
         } catch (InterruptedException e) {
+            order.setOrderStatus(OrderStatus.FAILED);
             Thread.currentThread().interrupt();
             throw new RuntimeException("주문 확정 중 인터럽트 발생", e);
         } finally {
-            order.setOrderStatus(OrderStatus.FAILED);
             releaseAllLocks(lockMap);
         }
     }
@@ -304,18 +303,19 @@ public class OrdersService {
     }
 
     // ===== DTO 변환 헬퍼 메서드 =====
-    private OrdersResponseDto convertToOrderResponseDto(Orders savedOrder) {
-        return OrdersResponseDto.builder()
+    private OrdersDetailDto convertToOrderResponseDto(Orders savedOrder) {
+        return OrdersDetailDto.builder()
                 .orderId(savedOrder.getOrderId())
                 .totalPrice(savedOrder.getTotalPrice())
                 .orderDate(savedOrder.getOrderDate())
                 .orderItems(convertToOrderItemDtoList(savedOrder.getOrderItems()))
+                .orderAddress(savedOrder.getOrderAddress())
                 .build();
     }
 
-    private List<OrderItemDto> convertToOrderItemDtoList(List<OrderItem> orderItems) {
+    private List<OrderItemDetailDto> convertToOrderItemDtoList(List<OrderItem> orderItems) {
         return orderItems.stream()
-                .map(OrderItemDto::from)
+                .map(OrderItemDetailDto::from)
                 .toList();
     }
 }

@@ -12,7 +12,4 @@ import java.util.List;
 public class OrdersCreateRequestDto {
     private List<Long> selectedCartIds;
 
-    public OrdersCreateRequestDto(List<Long> selectedCartIds) {
-        this.selectedCartIds = selectedCartIds;
-    }
 }
