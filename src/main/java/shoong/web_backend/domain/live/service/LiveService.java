@@ -185,7 +185,8 @@ public class LiveService {
                                         item.getItem().getItemId(),
                                         item.getItem().getItemName(),
                                         item.getItem().getItemImages().get(0).getUrl(),
-                                        item.getItem().getPrice()
+                                        item.getItem().getPrice(),
+                                        item.getItem().getDiscountRate()
                                 ))
                                 .collect(Collectors.toList())
                 ))
@@ -335,7 +336,8 @@ public class LiveService {
                             item.getItemId(),
                             item.getItemName(),
                             item.getItemImages().get(0).getUrl(),
-                            item.getPrice()
+                            item.getPrice(),
+                            item.getDiscountRate()
                     );
                 })
                 .collect(Collectors.toList());

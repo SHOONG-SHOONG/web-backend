@@ -10,4 +10,5 @@ public class LiveItemResponseDto {
     private String itemName;
     private String imageUrl;
     private Long price;
+    private Double discountRate;
 }
