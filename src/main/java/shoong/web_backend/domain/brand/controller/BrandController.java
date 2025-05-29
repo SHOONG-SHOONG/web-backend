@@ -25,7 +25,6 @@ public class BrandController {
     private final UserRepository userRepository;
 
     @Operation(summary = "브랜드 등록", description = "브랜드 등록 API")
-    @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createBrand(
             @RequestParam("name") String name,
@@ -45,7 +44,7 @@ public class BrandController {
     }
 
     @Operation(summary = "브랜드 상세 조회", description = "브랜드 ID로 상세 정보를 조회합니다.")
-    @GetMapping("/{brandId}")
+    @GetMapping("/summary/{brandId}")
     public ResponseEntity<BrandResponseDto> getBrand(@PathVariable Long brandId) {
         BrandResponseDto brandResponseDto = brandService.getBrandById(brandId);
 

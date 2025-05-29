@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,6 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.SerializationUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -106,13 +108,16 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers(WhiteList.WHITELIST).permitAll()
-                        .requestMatchers("/admin").hasRole("ADMIN")
+                        // Brand 관련
+                        .requestMatchers(HttpMethod.GET, "/brand/{brandId}").permitAll() // 브랜드 상세 조회는 누구나
+                        // Item 관련
+                        // .requestMatchers(HttpMethod.GET, "/item/summary/**").permitAll()                        .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(
                         (exception) -> exception
                                 .authenticationEntryPoint(customAuthenticationEntryPoint) )
 
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
                 // 중복 제거하고 한 번만 설정
                 .sessionManagement((session) -> session
@@ -120,10 +125,5 @@ public class SecurityConfig {
         return http.build();
     }
 }
-/*
-(exception) -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        })
- */
+
 

@@ -64,6 +64,7 @@ public class LiveService {
                 .imageUrl(imageUrl)
                 .liveDate(Optional.ofNullable(liveCreateRequestDto.getLiveDate()).orElse(LocalDate.now()))
                 .liveStartTime(liveCreateRequestDto.getLiveStartTime())
+                .streamKey(liveCreateRequestDto.getStreamKey())
                 .liveEndTime(null)
                 .liveStatus(LiveStatus.SCHEDULED)
                 .user(user)

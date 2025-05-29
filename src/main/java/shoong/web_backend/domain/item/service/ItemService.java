@@ -37,8 +37,7 @@ public class ItemService {
 
     // 아이템 생성
     @Transactional
-    public void createItem(ItemRequestDto dto, Long userId, MultipartFile[] imageFiles) {
-        User user = findUserById(userId);
+    public void createItem(ItemRequestDto dto, User user, MultipartFile[] imageFiles) {
         Brand brand = findBrandByUser(user);
         Item item = createItemFromDto(dto, brand);
 
@@ -48,11 +47,14 @@ public class ItemService {
     @Transactional(readOnly = true)
     public List<ItemResponseDto> getAdminItemList(Long userId) {
         User user = findUserById(userId);
-        Brand brand = findBrandByUser(user);
-        List<Item> items = itemRepository.findByBrand_BrandId(brand.getBrandId());
-        return items.stream()
-                .map(this::convertToItemResponseDto)
-                .collect(Collectors.toList()); // ✅ 여기를 수정
+        if(user.getRole() != UserRole.CLIENT){
+            Brand brand = findBrandByUser(user);
+            List<Item> items = itemRepository.findByBrand_BrandId(brand.getBrandId());
+            return items.stream()
+                    .map(this::convertToItemResponseDto)
+                    .collect(Collectors.toList()); // ✅ 여기를 수정
+        }
+        return null;
     }
 
 

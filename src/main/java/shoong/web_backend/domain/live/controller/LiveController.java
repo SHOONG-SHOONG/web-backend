@@ -31,21 +31,19 @@ public class LiveController {
     private final UserRepository userRepository;
 
     @Operation(summary = "라이브 생성", description = "라이브 방송 생성 API")
-    @PreAuthorize("hasAuthority('STREAMER')")
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LiveCreateResponseDto> createLive(
             @RequestParam("title") String title,
             @RequestParam("description") String description,
-            @RequestParam(value = "LiveDate", required = false) LocalDate liveDate,
-            @RequestParam(value = "startTime", required = false) LocalDateTime startTime,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestParam(value = "itemIds", required = false) List<Long> itemIds,
             @RequestParam(value = "streamKey", required = true) String streamKey,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
         // DTO로 변환
+
         LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description,
-                imageFile, liveDate, startTime, itemIds, streamKey);
+                imageFile, LocalDate.now(), LocalDateTime.now(), itemIds, streamKey);
 
         User user = userRepository.findById(customUserDetails.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));

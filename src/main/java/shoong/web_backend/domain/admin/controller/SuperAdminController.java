@@ -3,19 +3,30 @@ package shoong.web_backend.domain.admin.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import shoong.web_backend.domain.admin.dto.AdminItemDto;
 import shoong.web_backend.domain.admin.dto.AdminUserDto;
 import shoong.web_backend.domain.admin.service.SuperAdminService;
+import shoong.web_backend.domain.item.dto.ItemResponseDto;
+import shoong.web_backend.domain.item.service.ItemService;
+import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
 
 import java.util.List;
+import shoong.web_backend.domain.user.repository.UserRepository;
 
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class SuperAdminController {
     private final SuperAdminService adminService;
+    private final UserRepository userRepository;
+    private final ItemService itemService;
+    @GetMapping("/item-list")
+    public List<ItemResponseDto> adminItems(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+       return itemService.getAdminItemList(customUserDetails.getUserId());
+    }
 
     @Operation(summary = "대기 사용자 조회")
     @GetMapping("/pending/users")

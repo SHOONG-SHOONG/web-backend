@@ -60,7 +60,7 @@ public class BrandService {
 
     @Transactional(readOnly = true)
     public BrandResponseDto getBrandById(Long brandId) {
-        Brand brand = brandRepository.findById(brandId) .orElseThrow(() ->
+        Brand brand = brandRepository.findById(brandId).orElseThrow(() ->
                 new IllegalArgumentException("해당 브랜드가 존재하지 않습니다."));
 
         List<BrandItemDto> brandItems = brand.getItems().stream()

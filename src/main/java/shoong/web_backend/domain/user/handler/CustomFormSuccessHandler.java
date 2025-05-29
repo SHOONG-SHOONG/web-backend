@@ -35,9 +35,10 @@ public class CustomFormSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         String username = authentication.getName();
         String userAlias = customUserDetails.getUserAlias();
         String role = authentication.getAuthorities().iterator().next().getAuthority();
+        long expireMs = 1000L * 60 * 60 * 12; // 12시간
 
         // access
-        String access = jwtUtil.createJwt("access", username, role ,userId, userAlias,60 * 10 * 1000L);
+        String access = jwtUtil.createJwt("access", username, role ,userId, userAlias,expireMs);
         response.setHeader("access", access);
 
         // refresh

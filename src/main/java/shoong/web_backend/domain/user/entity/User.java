@@ -91,11 +91,11 @@ public class User {
     @Builder.Default
     private List<Live> lives = new ArrayList<>();
 
-    @Builder
-    public User(String userName, String userPassword, UserRole role){
-        this.userName = userName;
-        this.userPassword = userPassword;
-        this.role = role;
-    }
+//    @Builder
+//    public User(String userName, String userPassword, UserRole role){
+//        this.userName = userName;
+//        this.userPassword = userPassword;
+//        this.role = role;
+//    }
 }
 

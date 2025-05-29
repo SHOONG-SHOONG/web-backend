@@ -23,32 +23,34 @@ import shoong.web_backend.domain.item.dto.ItemResponseDto;
 import shoong.web_backend.domain.item.dto.ItemUpdateRequestDto;
 import shoong.web_backend.domain.item.service.ItemService;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
+import shoong.web_backend.domain.user.entity.User;
+import shoong.web_backend.domain.user.repository.UserRepository;
 
 @RestController
-@RequestMapping("/item")
 @RequiredArgsConstructor
+@RequestMapping("/item")
 public class ItemController {
 
     private final ItemService itemService;
-
+    private final UserRepository userRepository;
     // 상품 등록
     // CRUD: Post, URI: /item
     @Operation(summary = "아이템 생성")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "아이템 생성 성공")
     })
-    @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createItem(
             @Parameter(description = "아이템 정보", required = true)
             @RequestPart("item") @Valid ItemRequestDto requestDto,
-
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-
             @Parameter(description = "이미지 파일", required = false)
-            @RequestPart(value = "imageFiles", required = false) MultipartFile[] imageFiles) {
+            @RequestPart(value = "imageFiles", required = false) MultipartFile[] imageFiles,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            ) {
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
 
-        itemService.createItem(requestDto, userDetails.getUserId(), imageFiles);
+        itemService.createItem(requestDto, user, imageFiles);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -57,8 +59,8 @@ public class ItemController {
 
 
     // 상품 상세 조회
-    // CRUD: Get, URI: /item/{itemId}
-    @GetMapping("/{itemId}")
+    // CRUD: Get, URI: /item/summary/{itemId}
+    @GetMapping("/summary/{itemId}")
     public ResponseEntity<ItemResponseDto> getItem(@PathVariable Long itemId) {
         ItemResponseDto itemResponseDto = itemService.getItem(itemId);
         return ResponseEntity.ok(itemResponseDto);
@@ -81,16 +83,19 @@ public class ItemController {
     }
     // 상품 수정
     // CRUD: Patch, URI: /item/{itemId}
-    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{itemId}")
     public ResponseEntity<Void> updateItem(@PathVariable Long itemId,
                                            @RequestBody @Valid ItemUpdateRequestDto updateDto,
-                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        itemService.updateItem(itemId, updateDto, userDetails.getUserId());
+                                           @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        User user = userRepository.findById(customUserDetails.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
+
+
+        itemService.updateItem(itemId, updateDto, user.getId());
         return ResponseEntity.ok().build();
     }
     //상품 삭제
-    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{itemId}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
         itemService.deleteItem(itemId);
