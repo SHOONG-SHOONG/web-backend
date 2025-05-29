@@ -19,5 +19,5 @@ public class UserDTO {
     private String role;
     private String registrationNumber;
     private String userStatus;
-
+    private Long brandId;
 }
