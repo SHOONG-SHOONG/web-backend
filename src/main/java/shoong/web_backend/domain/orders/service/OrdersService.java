@@ -117,6 +117,19 @@ public class OrdersService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<OrdersDetailDto> findOrdersByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus) {
+        List<Orders> ordersList = ordersRepository.findByUserIdAndOrderStatus(userId, orderStatus)
+                .stream()
+                .toList();
+
+        return ordersList.stream()
+                .map(OrdersDetailDto::from)
+                .toList();
+    }
+
+
+
     private Orders findOrderById(Long orderId) {
         return ordersRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("해당 orderId의 주문 조회를 실패했습니다."));
@@ -297,17 +310,6 @@ public class OrdersService {
     private List<OrderItemDto> convertToOrderItemDtoList(List<OrderItem> orderItems) {
         return orderItems.stream()
                 .map(OrderItemDto::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<OrdersDetailDto> findOrdersByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus) {
-        List<Orders> ordersList = ordersRepository.findByUserIdAndOrderStatus(userId, orderStatus)
-                .stream()
-                .toList();
-
-        return ordersList.stream()
-                .map(OrdersDetailDto::from)
                 .toList();
     }
 }
