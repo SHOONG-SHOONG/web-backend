@@ -7,10 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import shoong.web_backend.aws.AmazonS3Manager;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
-import shoong.web_backend.domain.live.dto.LiveCreateRequestDto;
-import shoong.web_backend.domain.live.dto.LiveCreateResponseDto;
-import shoong.web_backend.domain.live.dto.LiveMainDto;
-import shoong.web_backend.domain.live.dto.LiveScheduledDto;
+import shoong.web_backend.domain.live.dto.*;
 import shoong.web_backend.domain.live.entity.Live;
 import shoong.web_backend.domain.live.enums.LiveStatus;
 import shoong.web_backend.domain.live.repository.LiveRepository;
@@ -123,11 +120,6 @@ public class LiveService {
                 .itemImageUrl(firstItem != null ? firstItem.getItem().getItemImages().get(0).getUrl() : null)
                 .build();
     }
-
-
-
-
-
 
     @Transactional(readOnly = true)
     public List<LiveMainDto> getMainLiveList() {
@@ -257,7 +249,6 @@ public class LiveService {
                 .collect(Collectors.toList());
     }
 
-
     public String searchStreamKeyByTitle(String streamingTitle) {
         return liveRepository
                 .findFirstByTitleContainingIgnoreCaseOrderByLiveDateDesc(streamingTitle)
@@ -272,9 +263,6 @@ public class LiveService {
                 .orElseThrow(() -> new NoSuchElementException("가장 최근 방송이 존재하지 않습니다."));
 
     }
-
-
-
 
     @Transactional(readOnly = true)
     public List<LiveMainDto> getCompLiveList() {
@@ -334,4 +322,36 @@ public class LiveService {
         liveRepository.save(live);
     }
 
+    @Transactional
+    (readOnly = true)
+    public LiveDetailDto getLiveById(Long liveid) {
+        Live live = liveRepository.findById(liveid)
+                .orElseThrow(() -> new NoSuchElementException("해당 라이브가 존재하지 않습니다."));
+
+        List<LiveItemResponseDto> liveItemResponseDtos = live.getLiveItems().stream()
+                .map(liveItem -> {
+                    Item item = liveItem.getItem();
+                    return new LiveItemResponseDto(
+                            item.getItemId(),
+                            item.getItemName(),
+                            item.getItemImages().get(0).getUrl(),
+                            item.getPrice()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new LiveDetailDto(
+                live.getId(),
+                live.getTitle(),
+                live.getDescription(),
+                live.getImageUrl(),
+                live.getStreamKey(),
+                live.getLiveStartTime(),
+                live.getLiveEndTime(),
+                live.getLiveDate(),
+                live.getLiveStatus(),
+                live.getReplayURL(),
+                liveItemResponseDtos
+        );
+    }
 }
