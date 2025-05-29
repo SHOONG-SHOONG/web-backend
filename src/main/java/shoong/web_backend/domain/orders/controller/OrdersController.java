@@ -7,7 +7,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import shoong.web_backend.domain.orders.dto.OrdersCreateRequestDto;
 import shoong.web_backend.domain.orders.dto.OrdersDetailDto;
-import shoong.web_backend.domain.orders.dto.OrdersResponseDto;
 import shoong.web_backend.domain.orders.dto.OrdersSuccessRequestDto;
 import shoong.web_backend.domain.orders.enums.OrderStatus;
 import shoong.web_backend.domain.orders.service.OrdersService;
@@ -24,11 +23,11 @@ public class OrdersController {
 
     // 주문 생성 API
     @PostMapping("/create")
-    public ResponseEntity<OrdersResponseDto> createOrderDraft(
+    public ResponseEntity<OrdersDetailDto> createOrderDraft(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody OrdersCreateRequestDto request) {
 
-        OrdersResponseDto orderDraft = ordersService.createOrderDraft(
+        OrdersDetailDto orderDraft = ordersService.createOrderDraft(
                 userDetails.getUserId(),
                 request.getSelectedCartIds()
         );
@@ -36,11 +35,11 @@ public class OrdersController {
     }
 
     @PostMapping("/success")
-    public ResponseEntity<OrdersResponseDto> finalizeOrder(
+    public ResponseEntity<OrdersDetailDto> finalizeOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody OrdersSuccessRequestDto request) {
 
-        OrdersResponseDto finalizedOrder = ordersService.finalizeOrder(
+        OrdersDetailDto finalizedOrder = ordersService.finalizeOrder(
                 userDetails.getUserId(),
                 request.getOrderId(),
                 request.getOrderAddress()
