@@ -59,4 +59,10 @@ public class OrdersController {
         List<OrdersDetailDto> orderList = ordersService.findOrdersByUserIdAndOrderStatus(userDetails.getUserId(), OrderStatus.CREATED);
         return ResponseEntity.ok(orderList);
     }
+
+    @GetMapping("{orderId}")
+    public ResponseEntity<OrdersDetailDto> getOrderDetail(@PathVariable Long orderId) {
+        OrdersDetailDto orderDetail = ordersService.findOrderDetailById(orderId);
+        return ResponseEntity.ok(orderDetail);
+    }
 }

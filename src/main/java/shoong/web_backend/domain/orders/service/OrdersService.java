@@ -128,7 +128,13 @@ public class OrdersService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public OrdersDetailDto findOrderDetailById(Long orderId) {
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("해당 orderId의 주문 조회를 실패했습니다."));
 
+        return OrdersDetailDto.from(order);
+    }
 
     private Orders findOrderById(Long orderId) {
         return ordersRepository.findById(orderId)
