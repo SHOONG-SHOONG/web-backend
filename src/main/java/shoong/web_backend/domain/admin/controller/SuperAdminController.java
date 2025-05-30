@@ -22,11 +22,6 @@ import shoong.web_backend.domain.user.repository.UserRepository;
 public class SuperAdminController {
     private final SuperAdminService adminService;
     private final UserRepository userRepository;
-    private final ItemService itemService;
-    @GetMapping("/item-list")
-    public List<ItemResponseDto> adminItems(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-       return itemService.getAdminItemList(customUserDetails.getUserId());
-    }
 
     @Operation(summary = "대기 사용자 조회")
     @GetMapping("/pending/users")
