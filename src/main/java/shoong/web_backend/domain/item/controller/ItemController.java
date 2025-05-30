@@ -33,6 +33,12 @@ public class ItemController {
 
     private final ItemService itemService;
     private final UserRepository userRepository;
+
+    @Operation(summary = "판매자 아이템 조회")
+    @GetMapping("/item-list")
+    public List<ItemResponseDto> adminItems(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return itemService.getAdminItemList(customUserDetails.getUserId());
+    }
     // 상품 등록
     // CRUD: Post, URI: /item
     @Operation(summary = "아이템 생성")
