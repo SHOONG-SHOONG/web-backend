@@ -19,7 +19,6 @@ import java.io.IOException;
 import shoong.web_backend.config.WhiteList;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.entity.User;
-import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
 /**

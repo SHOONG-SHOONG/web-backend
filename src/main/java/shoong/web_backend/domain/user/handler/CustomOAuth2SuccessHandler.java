@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 import shoong.web_backend.domain.user.dto.oauth2.CustomOAuth2User;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
@@ -23,6 +24,7 @@ import shoong.web_backend.generator.NickNameGenerator;
  * access, refresh -> httpOnly 쿠키
  * 리다이렉트 되기 때문에 헤더로 전달 불가능
  */
+@Component // 스프링 빈으로 등록
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;

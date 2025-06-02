@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 import shoong.web_backend.domain.user.dto.form.CustomUserDetails;
 import shoong.web_backend.domain.user.jwt.JWTUtil;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
@@ -20,6 +21,7 @@ import shoong.web_backend.domain.user.util.CookieUtil;
  * access -> 헤더
  * refresh -> 쿠키
  */
+@Component // 스프링 빈으로 등록
 @RequiredArgsConstructor
 public class CustomFormSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;

@@ -10,7 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
- @Component
+@Component
 public class JWTUtil {
     private final SecretKey secretKey;
 
@@ -34,9 +34,9 @@ public class JWTUtil {
         return getPayload(token).get("role", String.class);
     }
 
-     public String getUserAlias(String token){
-         return getPayload(token).get("userAlias", String.class);
-     }
+    public String getUserAlias(String token){
+        return getPayload(token).get("userAlias", String.class);
+    }
 
     public String getCategory(String token){
         return getPayload(token).get("category", String.class);

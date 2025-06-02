@@ -12,5 +12,9 @@ import java.util.Optional;
 public interface LiveItemRepository extends JpaRepository<LiveItem, Long> {
     Optional<LiveItem> findFirstByLiveIdOrderByIdAsc(Long liveId);
 
-    List<LiveItem> findOngoingLiveItems(List<Long> itemIds, LiveStatus liveStatus);
+    @Query("SELECT li FROM LiveItem li " +
+            "WHERE li.item.id IN :itemIds " +
+            "AND li.live.liveStatus = :liveStatus")
+    List<LiveItem> findOngoingLiveItems(@Param("itemIds") List<Long> itemIds,
+                                        @Param("liveStatus") LiveStatus liveStatus);
 }
