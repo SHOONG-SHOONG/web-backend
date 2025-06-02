@@ -1,14 +1,23 @@
 package shoong.web_backend.domain.orders.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
+import shoong.web_backend.domain.live.entity.Live;
+import shoong.web_backend.domain.live.enums.LiveStatus;
+import shoong.web_backend.domain.live.repository.LiveRepository;
+import shoong.web_backend.domain.live_item.entity.LiveItem;
+import shoong.web_backend.domain.live_item.repository.LiveItemRepository;
 import shoong.web_backend.domain.order_item.dto.OrderItemDetailDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
@@ -19,12 +28,15 @@ import shoong.web_backend.domain.orders.repository.OrdersRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import shoong.web_backend.exception.NotFoundException;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrdersService {
@@ -35,11 +47,13 @@ public class OrdersService {
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final RedissonClient redissonClient;
+    private final LiveRepository liveRepository;
 
     private static final String ORDER_LOCK_PREFIX = "order:lock:";
     private static final long WAIT_TIME = 10L;
     private static final long LEASE_TIME = 5L;
     private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
+    private final LiveItemRepository liveItemRepository;
 
     /**
      * 선택된 장바구니 상품으로 주문 생성
@@ -85,6 +99,7 @@ public class OrdersService {
 
     @Transactional
     public OrdersDetailDto finalizeOrder(Long userId, Long orderId, String orderAddress) {
+        User user = findUserById(userId);
         Orders order = findOrderById(orderId);
 //        validateUserOwnership(order, userId);
 
@@ -104,8 +119,42 @@ public class OrdersService {
             decreaseItemStock(orderItems); // ✅ 실제 차감
             removeSelectedCartItems(userId, order);
             order.setOrderAddress(orderAddress);
-
             order.setOrderStatus(OrderStatus.PAID);
+
+            List<LiveItem> liveItems = liveItemRepository.findOngoingLiveItems(itemIds, LiveStatus.ONGOING);
+
+            // itemId → liveId 매핑
+            Map<Long, Long> itemIdToLiveId = liveItems.stream()
+                    .collect(Collectors.toMap(
+                            li -> li.getItem().getItemId(),
+                            li -> li.getLive().getId(),
+                            (existing, replacement) -> existing
+                    ));
+
+            String eventType = "order_finalized";
+            String userIdStr = String.valueOf(userId);
+            String orderIdStr = String.valueOf(orderId);
+            String userAgeStr = String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears());
+            String timestamp = Instant.now().toString();
+
+            for (OrderItem orderItem : orderItems) {
+                Long itemId = orderItem.getItem().getItemId();
+                Long liveId = itemIdToLiveId.get(itemId);
+
+                if (liveId != null) {
+                    MDC.put("eventType", eventType);
+                    MDC.put("userId", userIdStr);
+                    MDC.put("orderId", orderIdStr);
+                    MDC.put("userAge", userAgeStr);
+                    MDC.put("timestamp", timestamp);
+                    MDC.put("itemId", String.valueOf(itemId));
+                    MDC.put("liveId", String.valueOf(liveId));
+
+                    log.info("결제 완료 이벤트 발생 (아이템 단위)");
+                    MDC.clear();
+                }
+            }
+
             return convertToOrderResponseDto(order);
         } catch (InterruptedException e) {
             order.setOrderStatus(OrderStatus.FAILED);
@@ -113,6 +162,7 @@ public class OrdersService {
             throw new RuntimeException("주문 확정 중 인터럽트 발생", e);
         } finally {
             releaseAllLocks(lockMap);
+            MDC.clear();
         }
     }
 

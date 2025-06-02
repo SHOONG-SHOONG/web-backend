@@ -1,6 +1,8 @@
 package shoong.web_backend.domain.cart.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import shoong.web_backend.domain.cart.dto.CartRequestDto;
@@ -12,9 +14,14 @@ import shoong.web_backend.domain.item.repository.ItemRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
@@ -41,6 +48,15 @@ public class CartServiceImpl implements CartService {
 
         cart.updateQuantity(cart.getCartQuantity() + request.getCartQuantity());
         Cart savedCart = cartRepository.save(cart);
+
+        MDC.put("eventType", "cart_added");
+        MDC.put("userId", String.valueOf(user.getId()));
+        MDC.put("userAge", String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears()));
+        MDC.put("itemId",  String.valueOf(item.getItemId()));
+        MDC.put("timestamp", Instant.now().toString());
+
+        log.info("장바구니 추가 이벤트 발생");
+        MDC.clear();
 
         return CartResponseDto.from(savedCart);
     }
