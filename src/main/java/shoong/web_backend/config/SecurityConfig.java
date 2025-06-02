@@ -113,7 +113,8 @@ public class SecurityConfig {
                         // Brand 관련
                         .requestMatchers(HttpMethod.GET, "/brand/{brandId}").permitAll() // 브랜드 상세 조회는 누구나
                         // Item 관련
-                        // .requestMatchers(HttpMethod.GET, "/item/summary/**").permitAll()                        .requestMatchers("/admin").hasRole("ADMIN")
+                        // .requestMatchers(HttpMethod.GET, "/item/summary/**").permitAll()
+                        .requestMatchers("/admin/*").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(
                         (exception) -> exception

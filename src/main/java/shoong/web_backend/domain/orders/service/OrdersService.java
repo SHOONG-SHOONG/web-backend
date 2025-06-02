@@ -1,23 +1,18 @@
 package shoong.web_backend.domain.orders.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
-import shoong.web_backend.domain.live.entity.Live;
-import shoong.web_backend.domain.live.enums.LiveStatus;
-import shoong.web_backend.domain.live.repository.LiveRepository;
-import shoong.web_backend.domain.live_item.entity.LiveItem;
-import shoong.web_backend.domain.live_item.repository.LiveItemRepository;
 import shoong.web_backend.domain.order_item.dto.OrderItemDetailDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
@@ -28,13 +23,15 @@ import shoong.web_backend.domain.orders.repository.OrdersRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import shoong.web_backend.exception.NotFoundException;
+import org.slf4j.MDC;
+import shoong.web_backend.domain.live.enums.LiveStatus;
+import shoong.web_backend.domain.live.repository.LiveRepository;
+import shoong.web_backend.domain.live_item.entity.LiveItem;
+import shoong.web_backend.domain.live_item.repository.LiveItemRepository;
 
 @Slf4j
 @Service
