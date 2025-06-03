@@ -19,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop   # 개발 시에는 update, 운영 배포 시에는 validate 추천
+      ddl-auto: validate   # 개발 시에는 update, 운영 배포 시에는 validate 추천
     show-sql: true        # 콘솔에 SQL 찍힘
     properties:
       hibernate:
