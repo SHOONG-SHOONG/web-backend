@@ -11,8 +11,6 @@ public class WhiteList {
             "/brand/list",
             "/brand/summary/**", // <-- 여기에 슬래시 추가됨
             "/live/vods",
-            "/live/list",
-            "/login/oauth2/code/kakao", 
-            "/oauth2/authorization/kakao"
+            "/live/list"
     };
 }
