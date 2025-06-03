@@ -11,6 +11,8 @@ public class WhiteList {
             "/brand/list",
             "/brand/summary/**", // <-- 여기에 슬래시 추가됨
             "/live/vods",
-            "/live/list"
+            "/live/list",
+            "/actuator/health",
+            "/actuator"
     };
 }
