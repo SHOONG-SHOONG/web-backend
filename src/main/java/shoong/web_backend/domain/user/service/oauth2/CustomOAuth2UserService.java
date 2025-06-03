@@ -79,6 +79,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             User saveUserEntity = User.builder()
                     .userName(username)
                     .name(oAuth2Response.getName())
+                    .userPassword("abcdefghi!")
                     .userEmail(oAuth2Response.getEmail())
                     .role(UserRole.CLIENT)
                     .userStatus(UserStatus.ACTIVE)
