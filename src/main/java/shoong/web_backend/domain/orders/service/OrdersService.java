@@ -133,7 +133,6 @@ public class OrdersService {
             String orderIdStr = String.valueOf(orderId);
             String userAgeStr = String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears());
             String timestamp = Instant.now().toString();
-
             for (OrderItem orderItem : orderItems) {
                 Long itemId = orderItem.getItem().getItemId();
                 Long liveId = itemIdToLiveId.get(itemId);
@@ -145,6 +144,8 @@ public class OrdersService {
                     MDC.put("userAge", userAgeStr);
                     MDC.put("timestamp", timestamp);
                     MDC.put("itemId", String.valueOf(itemId));
+                    MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
+                    MDC.put("price", String.valueOf(orderItem.getItem().getPrice()*orderItem.getOrderItemQuantity()*(1-orderItem.getItem().getDiscountRate())));
                     MDC.put("liveId", String.valueOf(liveId));
 
                     log.info("결제 완료 이벤트 발생 (아이템 단위)");
@@ -192,6 +193,26 @@ public class OrdersService {
 //            throw new UnauthorizedAccessException("해당 주문에 접근할 권한이 없습니다.");
 //        }
 //    }
+
+    public String getAgeGroup(int age) {
+        if (age >= 10 && age < 20) {
+            return "10대";
+        } else if (age >= 20 && age < 30) {
+            return "20대";
+        } else if (age >= 30 && age < 40) {
+            return "30대";
+        } else if (age >= 40 && age < 50) {
+            return "40대";
+        } else if (age >= 50 && age < 60) {
+            return "50대";
+        } else if (age >= 60 && age < 70) {
+            return "60대";
+        } else if (age >= 70 && age < 80) {
+            return "70대";
+        } else {
+            return "80대 이상";
+        }
+    }
 
     // ===== 락 관련 헬퍼 메서드 =====
     private void acquireItemLocks(List<Long> sortedItemIds, Map<Long, RLock> lockMap)

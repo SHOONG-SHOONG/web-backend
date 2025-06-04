@@ -2,6 +2,9 @@ package shoong.web_backend.domain.item.service;// example
 
 import jakarta.validation.Valid;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -27,6 +30,7 @@ import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
 import shoong.web_backend.exception.NotFoundException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemService {
@@ -62,6 +66,11 @@ public class ItemService {
     @Transactional(readOnly = true)
     public ItemResponseDto getItem(Long itemId) {
         Item item = findItemById(itemId);
+        MDC.put("eventType", "item_detail");
+        MDC.put("itemId", String.valueOf(itemId));
+        log.info("상품 조회");
+
+        MDC.clear();
         return convertToItemResponseDto(item);
     }
 
