@@ -117,4 +117,11 @@ public class LiveController {
         LiveDetailDto live = liveService.getLiveById(liveid);
         return ResponseEntity.ok(live);
     }
+
+    @Operation(summary = "라이브 종료 처리", description = "라이브 방송을 완료 상태로 변경합니다.")
+    @PostMapping("/complete/{liveId}")
+    public ResponseEntity<Void> completeLive(@PathVariable Long liveId) {
+        liveService.completeLive(liveId);
+        return ResponseEntity.ok().build();
+    }
 }
