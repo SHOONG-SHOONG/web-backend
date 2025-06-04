@@ -357,8 +357,7 @@ public class LiveService {
                 liveItemResponseDtos
         );
     }
-<<<<<<< Updated upstream
-    
+
     @Transactional
     public void completeLive(Long liveId) {
         Live live = liveRepository.findById(liveId)
@@ -370,37 +369,3 @@ public class LiveService {
         liveRepository.save(live);
     }
 }
-=======
-
-    // 시청자 라이브 입장 시 카운트
-//    @Transactional
-//    public void logUserEnterLive(User user, Long liveId) {
-//        int age = Period.between(user.getBirthDay(), LocalDate.now()).getYears();
-//        log.info("LIVE_EVENT: {}", Map.of(
-//                "action", "ENTER",
-//                "timestamp", LocalDateTime.now(),
-//                "liveId", liveId,
-//                "userId", user.getId(),
-//                "userAge", age
-//        ));
-//    }
-//
-//    // 라이브 중 상품 결제 시 로그
-//    @Transactional
-//    public void logUserOrderDuringLive(User user, Long liveId, Item item, LocalDateTime orderTime) {
-//        int age = Period.between(user.getBirthDay(), LocalDate.now()).getYears();
-//        log.info("LIVE_EVENT: {}", Map.of(
-//                "action", "ORDER",
-//                "timestamp", LocalDateTime.now(),
-//                "liveId", liveId,
-//                "userId", user.getId(),
-//                "userAge", age,
-//                "itemId", item.getItemId(),
-//                "itemName", item.getItemName(),
-//                "orderTime", orderTime
-//        ));
-//    }
-
-
-}
->>>>>>> Stashed changes

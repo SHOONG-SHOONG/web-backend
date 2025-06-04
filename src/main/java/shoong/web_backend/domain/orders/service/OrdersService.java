@@ -161,7 +161,6 @@ public class OrdersService {
                 Long liveId = itemIdToLiveId.get(itemId);
 
                 if (liveId != null) {
-<<<<<<< Updated upstream
                     MDC.put("eventType", eventType);
                     MDC.put("userId", userIdStr);
                     MDC.put("orderId", orderIdStr);
@@ -171,25 +170,9 @@ public class OrdersService {
                     MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
                     MDC.put("price", String.valueOf(orderItem.getItem().getPrice()*orderItem.getOrderItemQuantity()*(1-orderItem.getItem().getDiscountRate())));
                     MDC.put("liveId", String.valueOf(liveId));
-=======
-//                    liveService.logUserOrderDuringLive(
-//                            user,
-//                            liveId,
-//                            orderItem.getItem(),
-//                            order.getOrderDate()
-//                    );
->>>>>>> Stashed changes
 
-//                    MDC.put("eventType", eventType);
-//                    MDC.put("userId", userIdStr);
-//                    MDC.put("orderId", orderIdStr);
-//                    MDC.put("userAge", userAgeStr);
-//                    MDC.put("timestamp", timestamp);
-//                    MDC.put("itemId", String.valueOf(itemId));
-//                    MDC.put("liveId", String.valueOf(liveId));
-//
-//                    log.info("결제 완료 이벤트 발생 (아이템 단위)");
-//                    MDC.clear();
+                    log.info("결제 완료 이벤트 발생 (아이템 단위)");
+                    MDC.clear();
                 }
             }
 

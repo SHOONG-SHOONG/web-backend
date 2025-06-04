@@ -11,13 +11,8 @@ public class WhiteList {
             "/brand/list",
             "/brand/summary/**", // <-- 여기에 슬래시 추가됨
             "/live/vods",
-<<<<<<< Updated upstream
             "/live/list",
             "/actuator/health",
             "/actuator"
-=======
-            "/live/list"
-//            "/live/enter/**"
->>>>>>> Stashed changes
     };
 }
