@@ -357,4 +357,15 @@ public class LiveService {
                 liveItemResponseDtos
         );
     }
+    
+    @Transactional
+    public void completeLive(Long liveId) {
+        Live live = liveRepository.findById(liveId)
+                .orElseThrow(() -> new NoSuchElementException("해당 라이브가 존재하지 않습니다. liveId: " + liveId));
+
+        live.setLiveStatus(LiveStatus.COMPLETED);
+        live.setLiveEndTime(LocalDateTime.now()); 
+
+        liveRepository.save(live);
+    }
 }
