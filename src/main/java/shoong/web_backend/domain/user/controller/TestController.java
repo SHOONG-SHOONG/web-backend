@@ -38,7 +38,8 @@ public class TestController {
                 .bdate(user.getBirthDay())
                 .registrationNumber(user.getRegistrationNumber() != null ? user.getRegistrationNumber() : null)
                 .userStatus(user.getUserStatus().name())
-                .brandId(user.getBrand().getBrandId() != null ? user.getBrand().getBrandId() : null)
+                .brandId(user.getBrand() != null ? user.getBrand().getBrandId() : null)
+//                .brandId(user.getBrand().getBrandId() != null ? user.getBrand().getBrandId() : null)
                 .build();
 
         return ResponseEntity.ok(userDTO);
