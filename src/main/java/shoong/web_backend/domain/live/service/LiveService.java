@@ -1,6 +1,7 @@
 package shoong.web_backend.domain.live.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,12 +22,11 @@ import shoong.web_backend.domain.user.repository.UserRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.time.Period;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LiveService {
@@ -357,6 +357,7 @@ public class LiveService {
                 liveItemResponseDtos
         );
     }
+<<<<<<< Updated upstream
     
     @Transactional
     public void completeLive(Long liveId) {
@@ -369,3 +370,37 @@ public class LiveService {
         liveRepository.save(live);
     }
 }
+=======
+
+    // 시청자 라이브 입장 시 카운트
+//    @Transactional
+//    public void logUserEnterLive(User user, Long liveId) {
+//        int age = Period.between(user.getBirthDay(), LocalDate.now()).getYears();
+//        log.info("LIVE_EVENT: {}", Map.of(
+//                "action", "ENTER",
+//                "timestamp", LocalDateTime.now(),
+//                "liveId", liveId,
+//                "userId", user.getId(),
+//                "userAge", age
+//        ));
+//    }
+//
+//    // 라이브 중 상품 결제 시 로그
+//    @Transactional
+//    public void logUserOrderDuringLive(User user, Long liveId, Item item, LocalDateTime orderTime) {
+//        int age = Period.between(user.getBirthDay(), LocalDate.now()).getYears();
+//        log.info("LIVE_EVENT: {}", Map.of(
+//                "action", "ORDER",
+//                "timestamp", LocalDateTime.now(),
+//                "liveId", liveId,
+//                "userId", user.getId(),
+//                "userAge", age,
+//                "itemId", item.getItemId(),
+//                "itemName", item.getItemName(),
+//                "orderTime", orderTime
+//        ));
+//    }
+
+
+}
+>>>>>>> Stashed changes

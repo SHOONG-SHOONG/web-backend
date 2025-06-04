@@ -13,6 +13,7 @@ import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
+import shoong.web_backend.domain.live.service.LiveService;
 import shoong.web_backend.domain.order_item.dto.OrderItemDetailDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
@@ -44,7 +45,7 @@ public class OrdersService {
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final RedissonClient redissonClient;
-    private final LiveRepository liveRepository;
+
 
     private static final String ORDER_LOCK_PREFIX = "order:lock:";
     private static final long WAIT_TIME = 10L;
@@ -82,6 +83,28 @@ public class OrdersService {
 
             List<OrderItem> orderItems = savedOrder.getOrderItems();
             orderItemRepository.saveAll(orderItems);
+
+            // ✅ MDC 로그 추가: 구매 로그 기록
+            for (OrderItem orderItem : orderItems) {
+                Item item = orderItem.getItem();
+
+                MDC.put("event", "purchase");
+                MDC.put("userId", String.valueOf(user.getId()));
+                MDC.put("itemId", String.valueOf(item.getItemId()));
+                MDC.put("itemName", item.getItemName());
+                MDC.put("category", item.getCategory());
+
+                Map<String, Object> purchaseInfo = new HashMap<>();
+                purchaseInfo.put("orderId", savedOrder.getOrderId());
+                purchaseInfo.put("quantity", orderItem.getOrderItemQuantity());
+                purchaseInfo.put("price", item.getPrice());
+                purchaseInfo.put("totalPrice", item.getPrice() * orderItem.getOrderItemQuantity());
+                purchaseInfo.put("timestamp", Instant.now());
+
+                log.info("상품 구매 완료: {}", purchaseInfo);
+                MDC.clear(); // 각 루프마다 MDC 초기화 (안 해주면 이전 값이 다음 루프에 남을 수 있음)
+            }
+
 
             return convertToOrderResponseDto(savedOrder);
 
@@ -138,6 +161,7 @@ public class OrdersService {
                 Long liveId = itemIdToLiveId.get(itemId);
 
                 if (liveId != null) {
+<<<<<<< Updated upstream
                     MDC.put("eventType", eventType);
                     MDC.put("userId", userIdStr);
                     MDC.put("orderId", orderIdStr);
@@ -147,9 +171,25 @@ public class OrdersService {
                     MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
                     MDC.put("price", String.valueOf(orderItem.getItem().getPrice()*orderItem.getOrderItemQuantity()*(1-orderItem.getItem().getDiscountRate())));
                     MDC.put("liveId", String.valueOf(liveId));
+=======
+//                    liveService.logUserOrderDuringLive(
+//                            user,
+//                            liveId,
+//                            orderItem.getItem(),
+//                            order.getOrderDate()
+//                    );
+>>>>>>> Stashed changes
 
-                    log.info("결제 완료 이벤트 발생 (아이템 단위)");
-                    MDC.clear();
+//                    MDC.put("eventType", eventType);
+//                    MDC.put("userId", userIdStr);
+//                    MDC.put("orderId", orderIdStr);
+//                    MDC.put("userAge", userAgeStr);
+//                    MDC.put("timestamp", timestamp);
+//                    MDC.put("itemId", String.valueOf(itemId));
+//                    MDC.put("liveId", String.valueOf(liveId));
+//
+//                    log.info("결제 완료 이벤트 발생 (아이템 단위)");
+//                    MDC.clear();
                 }
             }
 

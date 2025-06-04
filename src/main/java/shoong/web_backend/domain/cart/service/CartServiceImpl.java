@@ -50,10 +50,18 @@ public class CartServiceImpl implements CartService {
         Cart savedCart = cartRepository.save(cart);
 
         MDC.put("eventType", "cart_added");
+        MDC.put("timestamp", Instant.now().toString());
+
+        // 유저 관련
         MDC.put("userId", String.valueOf(user.getId()));
         MDC.put("userAge", String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears()));
+
+        // item 관련
         MDC.put("itemId",  String.valueOf(item.getItemId()));
-        MDC.put("timestamp", Instant.now().toString());
+        MDC.put("itemName",  String.valueOf(item.getItemName()));
+        MDC.put("category",  String.valueOf(item.getCategory()));
+        MDC.put("itemId",  String.valueOf(item.getPrice()));
+
 
         log.info("장바구니 추가 이벤트 발생");
         MDC.clear();

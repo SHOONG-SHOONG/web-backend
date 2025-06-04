@@ -1,27 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
-    <!-- 콘솔로 출력 (기존과 동일) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSSX</timestampPattern>
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+        </encoder>
     </appender>
 
-    <!-- 파일로 출력 -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/app/logs/application.log</file>
-
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/app/logs/application.%d{yyyy-MM-dd}.log</fileNamePattern> <!-- 매일 하나의 파일에 저장 -->
-            <maxHistory>7</maxHistory> <!-- 7일치만 저장 -->
-        </rollingPolicy>
-
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-    </appender>
-
-    <!-- root 로거에 두 appender 모두 연결 -->
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE"/>
     </root>
-
 </configuration>

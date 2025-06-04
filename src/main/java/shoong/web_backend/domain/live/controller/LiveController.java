@@ -118,10 +118,24 @@ public class LiveController {
         return ResponseEntity.ok(live);
     }
 
+<<<<<<< Updated upstream
     @Operation(summary = "라이브 종료 처리", description = "라이브 방송을 완료 상태로 변경합니다.")
     @PostMapping("/complete/{liveId}")
     public ResponseEntity<Void> completeLive(@PathVariable Long liveId) {
         liveService.completeLive(liveId);
         return ResponseEntity.ok().build();
     }
+=======
+//    @PostMapping("/enter/{liveId}")
+//    public ResponseEntity<Void> logUserEnterLive(
+//            @PathVariable Long liveId,
+//            @AuthenticationPrincipal CustomUserDetails customUserDetails
+//    ) {
+//        User user = userRepository.findById(customUserDetails.getUserId())
+//                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저가 존재하지 않습니다."));
+//        liveService.logUserEnterLive(user, liveId);
+//        return ResponseEntity.ok().build();
+//    }
+
+>>>>>>> Stashed changes
 }
