@@ -112,9 +112,9 @@ public class OrdersService {
         Map<Long, RLock> lockMap = new HashMap<>();
         try {
             acquireItemLocks(itemIds, lockMap);
-            validateStockAvailabilityWithOrder(orderItems); // ✅ 재확인 안전망
+            validateStockAvailabilityWithOrder(orderItems);
 
-            decreaseItemStock(orderItems); // ✅ 실제 차감
+            decreaseItemStock(orderItems);
             removeSelectedCartItems(userId, order);
             order.setOrderAddress(orderAddress);
             order.setOrderStatus(OrderStatus.PAID);
@@ -136,9 +136,16 @@ public class OrdersService {
             String timestamp = Instant.now().toString();
             for (OrderItem orderItem : orderItems) {
                 Long itemId = orderItem.getItem().getItemId();
-                Long liveId = itemIdToLiveId.get(itemId);
+                LiveItem matchedLiveItem = liveItems.stream()
+                        .filter(li -> li.getItem().getItemId().equals(itemId))
+                        .findFirst()
+                        .orElse(null);
 
-                if (liveId != null) {
+                if (matchedLiveItem != null) {
+                    Long liveId = matchedLiveItem.getLive().getId();
+                    String liveStartTime = matchedLiveItem.getLive().getLiveStartTime().toString();
+                    String liveEndTime = matchedLiveItem.getLive().getLiveEndTime().toString();
+
                     MDC.put("eventType", eventType);
                     MDC.put("userId", userIdStr);
                     MDC.put("orderId", orderIdStr);
@@ -146,10 +153,12 @@ public class OrdersService {
                     MDC.put("timestamp", timestamp);
                     MDC.put("itemId", String.valueOf(itemId));
                     MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
-                    MDC.put("price", String.valueOf(orderItem.getItem().getPrice()*orderItem.getOrderItemQuantity()*(1-orderItem.getItem().getDiscountRate())));
+                    MDC.put("price", String.valueOf(orderItem.getItem().getPrice() * orderItem.getOrderItemQuantity() * (1 - orderItem.getItem().getDiscountRate())));
                     MDC.put("liveId", String.valueOf(liveId));
+                    MDC.put("liveStartTime", liveStartTime);
+                    MDC.put("liveEndTime", liveEndTime);
 
-                    log.info("결제 완료 이벤트 발생 (아이템 단위)");
+                    log.info("결제 완료 이벤트 발생");
                     MDC.clear();
                 }
             }
@@ -157,11 +166,30 @@ public class OrdersService {
 
 
 
+
             for (OrderItem orderItem : orderItems) {
                 Item item = orderItem.getItem();
+                Long itemId = item.getItemId();
+
+                // live 정보 가져오기
+                LiveItem matchedLiveItem = liveItems.stream()
+                        .filter(li -> li.getItem().getItemId().equals(itemId))
+                        .findFirst()
+                        .orElse(null);
+
+                if (matchedLiveItem != null) {
+                    String liveId = String.valueOf(matchedLiveItem.getLive().getId());
+                    String liveStartTime = matchedLiveItem.getLive().getLiveStartTime().toString();
+                    String liveEndTime = matchedLiveItem.getLive().getLiveEndTime().toString();
+
+                    MDC.put("liveId", liveId);
+                    MDC.put("liveStartTime", liveStartTime);
+                    MDC.put("liveEndTime", liveEndTime);
+                }
 
                 MDC.put("eventType", "purchase");
                 MDC.put("userId", String.valueOf(user.getId()));
+                MDC.put("userAge", String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears()));
                 MDC.put("orderId", String.valueOf(order.getOrderId()));
                 MDC.put("itemId", String.valueOf(item.getItemId()));
                 MDC.put("itemName", item.getItemName());
@@ -171,7 +199,10 @@ public class OrdersService {
                 MDC.put("totalPrice", String.valueOf(item.getPrice() * orderItem.getOrderItemQuantity()));
                 MDC.put("timestamp", Instant.now().toString());
 
-                log.info("상품 구매 완료"); 
+                MDC.put("생일: {}", String.valueOf(user.getBirthDay()));
+                MDC.put("오늘 날짜: {}", String.valueOf(LocalDate.now()));
+
+                log.info("상품 구매 완료");
                 MDC.clear();
             }
 
