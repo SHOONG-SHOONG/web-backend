@@ -84,28 +84,6 @@ public class OrdersService {
             List<OrderItem> orderItems = savedOrder.getOrderItems();
             orderItemRepository.saveAll(orderItems);
 
-            // ✅ MDC 로그 추가: 구매 로그 기록
-            for (OrderItem orderItem : orderItems) {
-                Item item = orderItem.getItem();
-
-                MDC.put("event", "purchase");
-                MDC.put("userId", String.valueOf(user.getId()));
-                MDC.put("itemId", String.valueOf(item.getItemId()));
-                MDC.put("itemName", item.getItemName());
-                MDC.put("category", item.getCategory());
-
-                Map<String, Object> purchaseInfo = new HashMap<>();
-                purchaseInfo.put("orderId", savedOrder.getOrderId());
-                purchaseInfo.put("quantity", orderItem.getOrderItemQuantity());
-                purchaseInfo.put("price", item.getPrice());
-                purchaseInfo.put("totalPrice", item.getPrice() * orderItem.getOrderItemQuantity());
-                purchaseInfo.put("timestamp", Instant.now());
-
-                log.info("상품 구매 완료: {}", purchaseInfo);
-                MDC.clear(); // 각 루프마다 MDC 초기화 (안 해주면 이전 값이 다음 루프에 남을 수 있음)
-            }
-
-
             return convertToOrderResponseDto(savedOrder);
 
         } catch (InterruptedException e) {
@@ -175,6 +153,29 @@ public class OrdersService {
                     MDC.clear();
                 }
             }
+
+
+
+
+            for (OrderItem orderItem : orderItems) {
+                Item item = orderItem.getItem();
+
+                MDC.put("eventType", "purchase");
+                MDC.put("userId", String.valueOf(user.getId()));
+                MDC.put("orderId", String.valueOf(order.getOrderId()));
+                MDC.put("itemId", String.valueOf(item.getItemId()));
+                MDC.put("itemName", item.getItemName());
+                MDC.put("category", item.getCategory());
+                MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
+                MDC.put("price", String.valueOf(item.getPrice()));
+                MDC.put("totalPrice", String.valueOf(item.getPrice() * orderItem.getOrderItemQuantity()));
+                MDC.put("timestamp", Instant.now().toString());
+
+                log.info("상품 구매 완료"); 
+                MDC.clear();
+            }
+
+
 
             return convertToOrderResponseDto(order);
         } catch (InterruptedException e) {
