@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <file>/app/logs/app.log</file>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSSX</timestampPattern>
             <includeContext>true</includeContext>
