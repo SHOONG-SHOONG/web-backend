@@ -1,4 +1,4 @@
-package shoong.web_backend.domain.item.service;// example
+package shoong.web_backend.domain.item.service;
 
 import jakarta.validation.Valid;
 import java.util.stream.Collectors;
@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import shoong.web_backend.domain.brand.entity.Brand;
-import shoong.web_backend.domain.brand.repository.BrandRepository;
 import shoong.web_backend.domain.item.condition.ItemSearchCondition;
 import shoong.web_backend.domain.item.dto.ItemRequestDto;
 import shoong.web_backend.domain.item.dto.ItemResponseDto;
@@ -205,7 +204,7 @@ public class ItemService {
 
     private int calculateFinalPrice(Item item) {
         // 1.0 - 0.3(할인율) -> 0.7 * 가격
-        return (int) Math.floor(item.getPrice() * (1.0 - item.getDiscountRate()));
+        return (int) Math.round(item.getPrice() * (1.0 - item.getDiscountRate()));
     }
 }
 

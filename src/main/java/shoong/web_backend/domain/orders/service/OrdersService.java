@@ -13,7 +13,6 @@ import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
-import shoong.web_backend.domain.live.service.LiveService;
 import shoong.web_backend.domain.order_item.dto.OrderItemDetailDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
@@ -24,13 +23,15 @@ import shoong.web_backend.domain.orders.repository.OrdersRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.repository.UserRepository;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import shoong.web_backend.exception.NotFoundException;
 import org.slf4j.MDC;
 import shoong.web_backend.domain.live.enums.LiveStatus;
-import shoong.web_backend.domain.live.repository.LiveRepository;
 import shoong.web_backend.domain.live_item.entity.LiveItem;
 import shoong.web_backend.domain.live_item.repository.LiveItemRepository;
 
@@ -45,7 +46,6 @@ public class OrdersService {
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final RedissonClient redissonClient;
-
 
     private static final String ORDER_LOCK_PREFIX = "order:lock:";
     private static final long WAIT_TIME = 10L;
@@ -186,10 +186,6 @@ public class OrdersService {
                 }
             }
 
-
-
-
-
             for (OrderItem orderItem : orderItems) {
                 Item item = orderItem.getItem();
                 Long itemId = item.getItemId();
@@ -228,8 +224,6 @@ public class OrdersService {
                 log.info("상품 구매 완료");
                 MDC.clear();
             }
-
-
 
             return convertToOrderResponseDto(order);
         } catch (InterruptedException e) {
@@ -271,26 +265,6 @@ public class OrdersService {
 //            throw new UnauthorizedAccessException("해당 주문에 접근할 권한이 없습니다.");
 //        }
 //    }
-
-    public String getAgeGroup(int age) {
-        if (age >= 10 && age < 20) {
-            return "10대";
-        } else if (age >= 20 && age < 30) {
-            return "20대";
-        } else if (age >= 30 && age < 40) {
-            return "30대";
-        } else if (age >= 40 && age < 50) {
-            return "40대";
-        } else if (age >= 50 && age < 60) {
-            return "50대";
-        } else if (age >= 60 && age < 70) {
-            return "60대";
-        } else if (age >= 70 && age < 80) {
-            return "70대";
-        } else {
-            return "80대 이상";
-        }
-    }
 
     // ===== 락 관련 헬퍼 메서드 =====
     private void acquireItemLocks(List<Long> sortedItemIds, Map<Long, RLock> lockMap)
@@ -423,9 +397,11 @@ public class OrdersService {
     }
 
     private Long calculateOrderItemPrice(Cart cart) {
-        return (long) (cart.getItem().getPrice() *
+        double raw = cart.getItem().getPrice() *
                 cart.getCartQuantity() *
-                (1 - cart.getItem().getDiscountRate()));
+                (1 - cart.getItem().getDiscountRate());
+
+        return Math.round(raw);
     }
 
     private Orders saveOrder(Orders order) {
