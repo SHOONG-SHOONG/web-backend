@@ -1,18 +1,14 @@
 package shoong.web_backend.domain.item.service;// example
 
 import jakarta.validation.Valid;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import shoong.web_backend.domain.brand.entity.Brand;
-import shoong.web_backend.domain.brand.repository.BrandRepository;
 import shoong.web_backend.domain.item.condition.ItemSearchCondition;
 import shoong.web_backend.domain.item.dto.ItemRequestDto;
 import shoong.web_backend.domain.item.dto.ItemResponseDto;
@@ -26,6 +22,10 @@ import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.enums.UserRole;
 import shoong.web_backend.domain.user.repository.UserRepository;
 import shoong.web_backend.exception.NotFoundException;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -196,7 +196,7 @@ public class ItemService {
 
     private int calculateFinalPrice(Item item) {
         // 1.0 - 0.3(할인율) -> 0.7 * 가격
-        return (int) Math.floor(item.getPrice() * (1.0 - item.getDiscountRate()));
+        return (int) Math.round(item.getPrice() * (1.0 - item.getDiscountRate()));
     }
 }
 
