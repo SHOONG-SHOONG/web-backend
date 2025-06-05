@@ -7,24 +7,25 @@ spring:
       max-file-size: 10MB       # 최대 업로드 파일 크기
       max-request-size: 15MB    # 요청 전체 크기 (여러 파일일 경우 고려)
   jwt:
-    secret: ${JWT_SECRET}
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
   application:
     name: web_backend
 
   datasource:
-    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_USERNAME}
-    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/shoong?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate   # 개발 시에는 update, 운영 배포 시에는 validate 추천
-    show-sql: true        # 콘솔에 SQL 찍힘
+      ddl-auto: validate  # 개발 시에는 create 또는 update 사용
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
     properties:
       hibernate:
-        format_sql: true  # SQL 보기 좋게 정렬
-    database-platform: org.hibernate.dialect.MariaDBDialect
+        format_sql: true
+
 
   security:
     oauth2:

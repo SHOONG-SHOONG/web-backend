@@ -1,20 +1,18 @@
 package shoong.web_backend.domain.orders.service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shoong.web_backend.domain.cart.entity.Cart;
 import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
-import shoong.web_backend.domain.live.enums.LiveStatus;
-import shoong.web_backend.domain.live.repository.LiveRepository;
-import shoong.web_backend.domain.live_item.entity.LiveItem;
-import shoong.web_backend.domain.live_item.repository.LiveItemRepository;
 import shoong.web_backend.domain.order_item.dto.OrderItemDetailDto;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.order_item.repository.OrderItemRepository;
@@ -24,17 +22,18 @@ import shoong.web_backend.domain.orders.enums.OrderStatus;
 import shoong.web_backend.domain.orders.repository.OrdersRepository;
 import shoong.web_backend.domain.user.entity.User;
 import shoong.web_backend.domain.user.repository.UserRepository;
-import shoong.web_backend.exception.NotFoundException;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import shoong.web_backend.exception.NotFoundException;
+import org.slf4j.MDC;
+import shoong.web_backend.domain.live.enums.LiveStatus;
+import shoong.web_backend.domain.live_item.entity.LiveItem;
+import shoong.web_backend.domain.live_item.repository.LiveItemRepository;
 
 @Slf4j
 @Service
@@ -47,7 +46,6 @@ public class OrdersService {
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final RedissonClient redissonClient;
-    private final LiveRepository liveRepository;
 
     private static final String ORDER_LOCK_PREFIX = "order:lock:";
     private static final long WAIT_TIME = 10L;
@@ -114,9 +112,9 @@ public class OrdersService {
         Map<Long, RLock> lockMap = new HashMap<>();
         try {
             acquireItemLocks(itemIds, lockMap);
-            validateStockAvailabilityWithOrder(orderItems); // ✅ 재확인 안전망
+            validateStockAvailabilityWithOrder(orderItems);
 
-            decreaseItemStock(orderItems); // ✅ 실제 차감
+            decreaseItemStock(orderItems);
             removeSelectedCartItems(userId, order);
             order.setOrderAddress(orderAddress);
             order.setOrderStatus(OrderStatus.PAID);
@@ -134,25 +132,97 @@ public class OrdersService {
             String eventType = "order_finalized";
             String userIdStr = String.valueOf(userId);
             String orderIdStr = String.valueOf(orderId);
-            String userAgeStr = String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears());
             String timestamp = Instant.now().toString();
+
+            String userAgeStr = String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears());
+            int userAge = Period.between(user.getBirthDay(), LocalDate.now()).getYears();
+            // ✅ 연령대 매핑
+            String ageGroup;
+            if (userAge >= 10 && userAge < 20) {
+                ageGroup = "10-19";
+            } else if (userAge < 30) {
+                ageGroup = "20-29";
+            } else if (userAge < 40) {
+                ageGroup = "30-39";
+            } else if (userAge < 50) {
+                ageGroup = "40-49";
+            } else if (userAge < 60) {
+                ageGroup = "50-59";
+            } else if (userAge < 70) {
+                ageGroup = "60-69";
+            } else if (userAge < 80) {
+                ageGroup = "70-79";
+            } else {
+                ageGroup = "80+";
+            }
 
             for (OrderItem orderItem : orderItems) {
                 Long itemId = orderItem.getItem().getItemId();
-                Long liveId = itemIdToLiveId.get(itemId);
+                LiveItem matchedLiveItem = liveItems.stream()
+                        .filter(li -> li.getItem().getItemId().equals(itemId))
+                        .findFirst()
+                        .orElse(null);
 
-                if (liveId != null) {
+                if (matchedLiveItem != null) {
+                    Long liveId = matchedLiveItem.getLive().getId();
+                    String liveStartTime = matchedLiveItem.getLive().getLiveStartTime().toString();
+                    String liveEndTime = matchedLiveItem.getLive().getLiveEndTime().toString();
+
                     MDC.put("eventType", eventType);
                     MDC.put("userId", userIdStr);
                     MDC.put("orderId", orderIdStr);
                     MDC.put("userAge", userAgeStr);
+                    MDC.put("ageGroup", ageGroup);
                     MDC.put("timestamp", timestamp);
                     MDC.put("itemId", String.valueOf(itemId));
+                    MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
+                    MDC.put("price", String.valueOf(orderItem.getItem().getPrice() * orderItem.getOrderItemQuantity() * (1 - orderItem.getItem().getDiscountRate())));
                     MDC.put("liveId", String.valueOf(liveId));
+                    MDC.put("liveStartTime", liveStartTime);
+                    MDC.put("liveEndTime", liveEndTime);
 
-                    log.info("결제 완료 이벤트 발생 (아이템 단위)");
+                    log.info("결제 완료 이벤트 발생");
                     MDC.clear();
                 }
+            }
+
+            for (OrderItem orderItem : orderItems) {
+                Item item = orderItem.getItem();
+                Long itemId = item.getItemId();
+
+                // live 정보 가져오기
+                LiveItem matchedLiveItem = liveItems.stream()
+                        .filter(li -> li.getItem().getItemId().equals(itemId))
+                        .findFirst()
+                        .orElse(null);
+
+                if (matchedLiveItem != null) {
+                    String liveId = String.valueOf(matchedLiveItem.getLive().getId());
+                    String liveStartTime = matchedLiveItem.getLive().getLiveStartTime().toString();
+                    String liveEndTime = matchedLiveItem.getLive().getLiveEndTime().toString();
+
+                    MDC.put("liveId", liveId);
+                    MDC.put("liveStartTime", liveStartTime);
+                    MDC.put("liveEndTime", liveEndTime);
+                }
+
+                MDC.put("eventType", "purchase");
+                MDC.put("userId", String.valueOf(user.getId()));
+                MDC.put("userAge", String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears()));
+                MDC.put("orderId", String.valueOf(order.getOrderId()));
+                MDC.put("itemId", String.valueOf(item.getItemId()));
+                MDC.put("itemName", item.getItemName());
+                MDC.put("category", item.getCategory());
+                MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
+                MDC.put("price", String.valueOf(item.getPrice()));
+                MDC.put("totalPrice", String.valueOf(item.getPrice() * orderItem.getOrderItemQuantity()));
+                MDC.put("timestamp", Instant.now().toString());
+
+                MDC.put("생일: {}", String.valueOf(user.getBirthDay()));
+                MDC.put("오늘 날짜: {}", String.valueOf(LocalDate.now()));
+
+                log.info("상품 구매 완료");
+                MDC.clear();
             }
 
             return convertToOrderResponseDto(order);
