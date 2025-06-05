@@ -111,7 +111,8 @@ public class LiveService {
         LiveItem firstItem = live.getLiveItems().isEmpty() ? null : live.getLiveItems().get(0);
 
         return LiveMainDto.builder()
-                .id(live.getId())
+                .liveId(live.getId())
+                .itemId(firstItem != null ? firstItem.getItem().getItemId() : null)
                 .title(live.getTitle())
                 .imageUrl(live.getImageUrl())
                 .status(live.getLiveStatus())
@@ -119,54 +120,57 @@ public class LiveService {
                 .price(firstItem != null ? firstItem.getItem().getPrice() : null)
                 .discountRate(firstItem != null ? firstItem.getItem().getDiscountRate() : null)
                 .itemImageUrl(firstItem != null ? firstItem.getItem().getItemImages().get(0).getUrl() : null)
+                .liveDate(firstItem != null ? firstItem.getLive().getLiveDate() : null)
+                .liveStartTime(firstItem != null ? firstItem.getLive().getLiveStartTime() : null)
+                .liveEndTime(firstItem != null ? firstItem.getLive().getLiveEndTime() : null)
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public List<LiveMainDto> getMainLiveList() {
-        List<LiveMainDto> result = new ArrayList<>();
-
-        // 1. 현재 진행 중인 라이브
-        Live ongoingLive = liveRepository
-                .findFirstByLiveStatusOrderByLiveStartTimeAsc(LiveStatus.ONGOING)
-                .orElse(null);
-
-        if (ongoingLive != null) {
-
-            Optional<LiveItem> firstLiveItem = liveItemRepository.findFirstByLiveIdOrderByIdAsc(ongoingLive.getId());
-            Item item = firstLiveItem.map(LiveItem::getItem).orElse(null);
-            result.add(new LiveMainDto(ongoingLive.getId(), ongoingLive.getTitle(), ongoingLive.getImageUrl(),
-                    item.getItemName(),item.getPrice(), item.getDiscountRate(), item.getItemImages().get(0).getUrl(), ongoingLive.getLiveStatus()));
-        } else {
-            // 2. 예정된 라이브
-            Live scheduledLive = liveRepository
-                    .findFirstByLiveStatusAndLiveStartTimeAfterOrderByLiveStartTimeAsc(
-                            LiveStatus.SCHEDULED, LocalDateTime.now())
-                    .orElse(null);
-
-            if (scheduledLive != null) {
-                Optional<LiveItem> firstLiveItem = liveItemRepository.findFirstByLiveIdOrderByIdAsc(scheduledLive.getId());
-                Item item = firstLiveItem.map(LiveItem::getItem).orElse(null);
-                result.add(new LiveMainDto(scheduledLive.getId(), scheduledLive.getTitle(), scheduledLive.getImageUrl(),
-                        item.getItemName(),item.getPrice(), item.getDiscountRate(), item.getItemImages().get(0).getUrl(), scheduledLive.getLiveStatus()));
-            }
-        }
-
-        // 3. 종료된 라이브들
-        int remaining = 5 - result.size();
-        List<Live> endedLives = liveRepository
-                .findTopNByLiveStatusOrderByLiveEndTimeDesc(LiveStatus.COMPLETED, remaining);
-
-        for(Live live : endedLives) {
-
-            Optional<LiveItem> firstLiveItem = liveItemRepository.findFirstByLiveIdOrderByIdAsc(live.getId());
-            Item item = firstLiveItem.map(LiveItem::getItem).orElse(null);
-            result.add(new LiveMainDto(live.getId(), live.getTitle(), live.getImageUrl(),
-                    item.getItemName(),item.getPrice(), item.getDiscountRate(), item.getItemImages().get(0).getUrl(), live.getLiveStatus()));
-        }
-
-        return result;
-    }
+//    @Transactional(readOnly = true)
+//    public List<LiveMainDto> getMainLiveList() {
+//        List<LiveMainDto> result = new ArrayList<>();
+//
+//        // 1. 현재 진행 중인 라이브
+//        Live ongoingLive = liveRepository
+//                .findFirstByLiveStatusOrderByLiveStartTimeAsc(LiveStatus.ONGOING)
+//                .orElse(null);
+//
+//        if (ongoingLive != null) {
+//
+//            Optional<LiveItem> firstLiveItem = liveItemRepository.findFirstByLiveIdOrderByIdAsc(ongoingLive.getId());
+//            Item item = firstLiveItem.map(LiveItem::getItem).orElse(null);
+//            result.add(new LiveMainDto(ongoingLive.getId(), ongoingLive.getTitle(), ongoingLive.getImageUrl(),
+//                    item.getItemName(),item.getPrice(), item.getDiscountRate(), item.getItemImages().get(0).getUrl(), ongoingLive.getLiveStatus()));
+//        } else {
+//            // 2. 예정된 라이브
+//            Live scheduledLive = liveRepository
+//                    .findFirstByLiveStatusAndLiveStartTimeAfterOrderByLiveStartTimeAsc(
+//                            LiveStatus.SCHEDULED, LocalDateTime.now())
+//                    .orElse(null);
+//
+//            if (scheduledLive != null) {
+//                Optional<LiveItem> firstLiveItem = liveItemRepository.findFirstByLiveIdOrderByIdAsc(scheduledLive.getId());
+//                Item item = firstLiveItem.map(LiveItem::getItem).orElse(null);
+//                result.add(new LiveMainDto(scheduledLive.getId(), scheduledLive.getTitle(), scheduledLive.getImageUrl(),
+//                        item.getItemName(),item.getPrice(), item.getDiscountRate(), item.getItemImages().get(0).getUrl(), scheduledLive.getLiveStatus()));
+//            }
+//        }
+//
+//        // 3. 종료된 라이브들
+//        int remaining = 5 - result.size();
+//        List<Live> endedLives = liveRepository
+//                .findTopNByLiveStatusOrderByLiveEndTimeDesc(LiveStatus.COMPLETED, remaining);
+//
+//        for(Live live : endedLives) {
+//
+//            Optional<LiveItem> firstLiveItem = liveItemRepository.findFirstByLiveIdOrderByIdAsc(live.getId());
+//            Item item = firstLiveItem.map(LiveItem::getItem).orElse(null);
+//            result.add(new LiveMainDto(live.getId(), live.getTitle(), live.getImageUrl(),
+//                    item.getItemName(),item.getPrice(), item.getDiscountRate(), item.getItemImages().get(0).getUrl(), live.getLiveStatus()));
+//        }
+//
+//        return result;
+//    }
 
     @Transactional(readOnly = true)
     public List<LiveScheduledDto> getLiveScheduledByDate(LocalDate date) {
@@ -204,13 +208,17 @@ public class LiveService {
                     if (item != null && item.getItemImages() != null && !item.getItemImages().isEmpty()) {
                         return Optional.of(new LiveMainDto(
                                 live.getId(),
+                                item.getItemId(),
                                 live.getTitle(),
                                 live.getImageUrl(),
                                 item.getItemName(),
                                 item.getPrice(),
                                 item.getDiscountRate(),
                                 item.getItemImages().get(0).getUrl(),
-                                live.getLiveStatus()
+                                live.getLiveStatus(),
+                                live.getLiveDate(),
+                                live.getLiveStartTime(),
+                                live.getLiveEndTime()
                         ));
                     } else {
                         return Optional.empty(); // 아이템이 없거나 이미지가 없으면 반환하지 않음
@@ -230,21 +238,29 @@ public class LiveService {
                     if (item != null && item.getItemImages() != null && !item.getItemImages().isEmpty()) {
                         return new LiveMainDto(
                                 live.getId(),
+                                item.getItemId(),
                                 live.getTitle(),
                                 live.getImageUrl(),
                                 item.getItemName(),
                                 item.getPrice(),
                                 item.getDiscountRate(),
                                 item.getItemImages().get(0).getUrl(),
-                                live.getLiveStatus()
+                                live.getLiveStatus(),
+                                live.getLiveDate(),
+                                live.getLiveStartTime(),
+                                live.getLiveEndTime()
                         );
                     } else {
                         // 아이템이 없거나 이미지가 없으면 기본값 처리
                         return new LiveMainDto(
                                 live.getId(),
+                                item.getItemId(),
                                 live.getTitle(),
                                 live.getImageUrl(),
-                                null, null, null, null, live.getLiveStatus()
+                                null, null, null, null, live.getLiveStatus(),
+                                live.getLiveDate(),
+                                live.getLiveStartTime(),
+                                live.getLiveEndTime()
                         );
                     }
                 })
@@ -280,6 +296,7 @@ public class LiveService {
                     .findFirstByLiveIdOrderByIdAsc(live.getId());
 
             // 기본값 처리
+            Long itemId = null;
             String itemName = null;
             Long price = null;
             Double discountRate = null;
@@ -288,6 +305,7 @@ public class LiveService {
             if (firstLiveItemOpt.isPresent()) {
                 Item item = firstLiveItemOpt.get().getItem();
                 if (item != null) {
+                    itemId = item.getItemId();
                     itemName = item.getItemName();
                     price = item.getPrice();
                     discountRate = item.getDiscountRate();
@@ -301,13 +319,17 @@ public class LiveService {
             // DTO 생성 및 추가
             result.add(new LiveMainDto(
                     live.getId(),
+                    itemId,
                     live.getTitle(),
                     live.getImageUrl(),
                     itemName,
                     price,
                     discountRate,
                     itemImageUrl,
-                    live.getLiveStatus()
+                    live.getLiveStatus(),
+                    live.getLiveDate(),
+                    live.getLiveStartTime(),
+                    live.getLiveEndTime()
             ));
         }
 

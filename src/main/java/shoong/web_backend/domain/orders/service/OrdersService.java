@@ -132,8 +132,30 @@ public class OrdersService {
             String eventType = "order_finalized";
             String userIdStr = String.valueOf(userId);
             String orderIdStr = String.valueOf(orderId);
-            String userAgeStr = String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears());
             String timestamp = Instant.now().toString();
+
+            String userAgeStr = String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears());
+            int userAge = Period.between(user.getBirthDay(), LocalDate.now()).getYears();
+            // ✅ 연령대 매핑
+            String ageGroup;
+            if (userAge >= 10 && userAge < 20) {
+                ageGroup = "10-19";
+            } else if (userAge < 30) {
+                ageGroup = "20-29";
+            } else if (userAge < 40) {
+                ageGroup = "30-39";
+            } else if (userAge < 50) {
+                ageGroup = "40-49";
+            } else if (userAge < 60) {
+                ageGroup = "50-59";
+            } else if (userAge < 70) {
+                ageGroup = "60-69";
+            } else if (userAge < 80) {
+                ageGroup = "70-79";
+            } else {
+                ageGroup = "80+";
+            }
+
             for (OrderItem orderItem : orderItems) {
                 Long itemId = orderItem.getItem().getItemId();
                 LiveItem matchedLiveItem = liveItems.stream()
@@ -150,6 +172,7 @@ public class OrdersService {
                     MDC.put("userId", userIdStr);
                     MDC.put("orderId", orderIdStr);
                     MDC.put("userAge", userAgeStr);
+                    MDC.put("ageGroup", ageGroup);
                     MDC.put("timestamp", timestamp);
                     MDC.put("itemId", String.valueOf(itemId));
                     MDC.put("quantity", String.valueOf(orderItem.getOrderItemQuantity()));
