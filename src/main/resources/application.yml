@@ -12,7 +12,7 @@ spring:
     name: web_backend
 
   datasource:
-    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}?serverTimezone=Asia/Seoul
     username: ${DB_USERNAME}
     password: ${DB_USERNAME}
     driver-class-name: org.mariadb.jdbc.Driver
