@@ -67,7 +67,7 @@ public class LiveService {
                 .liveDate(Optional.ofNullable(liveCreateRequestDto.getLiveDate()).orElse(LocalDate.now()))
                 .liveStartTime(liveCreateRequestDto.getLiveStartTime())
                 .streamKey(liveCreateRequestDto.getStreamKey())
-                .liveEndTime(null)
+                .liveEndTime(liveCreateRequestDto.getLiveStartTime().plusHours(1))
                 .liveStatus(LiveStatus.SCHEDULED)
                 .user(user)
                 .build();
