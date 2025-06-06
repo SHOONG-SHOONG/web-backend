@@ -64,3 +64,11 @@ cloud:
         brand: brand
     stack:
       auto: false
+management: # 이 부분을 추가하세요.
+  endpoints:
+    web:
+      exposure:
+        include: 'health,info,prometheus'
+  endpoint:
+    prometheus:
+      enabled: true
