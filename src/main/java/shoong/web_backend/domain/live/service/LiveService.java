@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -395,7 +396,7 @@ public class LiveService {
     @Scheduled(fixedRate = 60_000) // 1분마다 실행
     @Transactional
     public void autoUpdateLiveStatus() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
         List<Live> lives = liveRepository.findAll(); // 조건이 명확하므로 전체 조회해도 부담 작음
 
