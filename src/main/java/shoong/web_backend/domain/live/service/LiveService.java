@@ -2,6 +2,7 @@ package shoong.web_backend.domain.live.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -389,5 +390,26 @@ public class LiveService {
         live.setLiveEndTime(LocalDateTime.now()); 
 
         liveRepository.save(live);
+    }
+
+    @Scheduled(fixedRate = 60_000) // 1분마다 실행
+    @Transactional
+    public void autoUpdateLiveStatus() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Live> lives = liveRepository.findAll(); // 조건이 명확하므로 전체 조회해도 부담 작음
+
+        for (Live live : lives) {
+            LocalDateTime start = live.getLiveStartTime();
+            LocalDateTime end = live.getLiveEndTime();
+
+            if (end != null && end.isBefore(now)) {
+                live.setLiveStatus(LiveStatus.COMPLETED);
+            } else if (start != null && start.isBefore(now)) {
+                live.setLiveStatus(LiveStatus.ONGOING);
+            } else {
+                live.setLiveStatus(LiveStatus.SCHEDULED);
+            }
+        }
     }
 }
