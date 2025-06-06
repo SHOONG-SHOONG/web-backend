@@ -50,8 +50,11 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         System.out.println("유저 고유 ID" + username);
         long id = user.getId();
         Integer expireS = 24 * 60 * 60;
+        // 엑세스 토큰 유효 시간 설정 (12시간)
+        long accessTokenExpiry = 12 * 60 * 60 * 1000L;
+    
         String access = jwtUtil.createJwt("access", username, role, id, userAlias,
-                60 * 10 * 1000L);
+                accessTokenExpiry);
         String refresh = jwtUtil.createJwt("refresh", username, role, id, userAlias,
                 expireS * 1000L);
 
@@ -60,7 +63,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         // refresh 토큰 DB 저장
         refreshTokenService.saveRefresh(username, expireS, refresh);
 
-        response.addCookie(CookieUtil.createCookie("access", access, 60 * 10));
+        response.addCookie(CookieUtil.createCookie("access", access, (int)(accessTokenExpiry / 1000L)));
         response.addCookie(CookieUtil.createCookie("refresh", refresh, expireS));
 
         // redirect query param 인코딩 후 전달
