@@ -12,13 +12,11 @@ import shoong.web_backend.domain.cart.repository.CartRepository;
 import shoong.web_backend.domain.item.entity.Item;
 import shoong.web_backend.domain.item.repository.ItemRepository;
 import shoong.web_backend.domain.user.entity.User;
-import shoong.web_backend.domain.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,8 +58,7 @@ public class CartServiceImpl implements CartService {
         MDC.put("itemId",  String.valueOf(item.getItemId()));
         MDC.put("itemName",  String.valueOf(item.getItemName()));
         MDC.put("category",  String.valueOf(item.getCategory()));
-        MDC.put("itemId",  String.valueOf(item.getPrice()));
-
+        MDC.put("price",  String.valueOf(item.getPrice()));
 
         log.info("장바구니 추가 이벤트 발생");
         MDC.clear();
