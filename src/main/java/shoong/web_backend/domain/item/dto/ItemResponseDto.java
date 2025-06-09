@@ -27,8 +27,8 @@ public class ItemResponseDto {
     private String category;
     private LocalDateTime discountExpiredAt;
     private ItemStatus status; // 혹은 enum ItemStatus로 변경 가능
-    // ItemImage 리스트 필드 추가
     private List<ItemImage> itemImages = new ArrayList<>();
+
     public ItemResponseDto(Long itemId, Long brandId, String itemName, Long price, Double discountRate,
                            Integer finalPrice, Long wishlistCount, String description, Integer itemQuantity,
                            String category, LocalDateTime discountExpiredAt, ItemStatus status) {

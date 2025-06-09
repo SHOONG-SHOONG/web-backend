@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-/*
- * 동적 쿼리를 위한 조건 클래스
- */
+// 동적 쿼리를 위한 조건 클래스
 @Getter
 @Setter
 @Builder

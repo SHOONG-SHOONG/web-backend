@@ -99,7 +99,6 @@ public class OrdersService {
     public OrdersDetailDto finalizeOrder(Long userId, Long orderId, String orderAddress) {
         User user = findUserById(userId);
         Orders order = findOrderById(orderId);
-//        validateUserOwnership(order, userId);
 
         List<OrderItem> orderItems = order.getOrderItems();
 
@@ -136,7 +135,7 @@ public class OrdersService {
 
             String userAgeStr = String.valueOf(Period.between(user.getBirthDay(), LocalDate.now()).getYears());
             int userAge = Period.between(user.getBirthDay(), LocalDate.now()).getYears();
-            // ✅ 연령대 매핑
+            // 연령대 매핑
             String ageGroup;
             if (userAge >= 10 && userAge < 20) {
                 ageGroup = "10-19";
@@ -260,13 +259,7 @@ public class OrdersService {
                 .orElseThrow(() -> new NotFoundException("해당 orderId의 주문 조회를 실패했습니다."));
     }
 
-//    private void validateUserOwnership(Orders order, Long userId) {
-//        if (!order.getUser().getId().equals(userId)) {
-//            throw new UnauthorizedAccessException("해당 주문에 접근할 권한이 없습니다.");
-//        }
-//    }
 
-    // ===== 락 관련 헬퍼 메서드 =====
     private void acquireItemLocks(List<Long> sortedItemIds, Map<Long, RLock> lockMap)
             throws InterruptedException {
         for (Long itemId : sortedItemIds) {
@@ -292,7 +285,6 @@ public class OrdersService {
         }
     }
 
-    // ===== 재고 검증 헬퍼 메서드 =====
     private void validateStockAvailabilityWithCart(List<Cart> selectedCarts) {
         for (Cart cart : selectedCarts) {
             Item item = cart.getItem();
@@ -323,7 +315,6 @@ public class OrdersService {
         }
     }
 
-    // ===== 장바구니 관련 헬퍼 메서드 =====
     private List<Cart> findSelectedCarts(Long userId, List<Long> selectedCartIds) {
         List<Cart> carts = cartRepository.findByUserIdAndCartIdIn(userId, selectedCartIds);
 
@@ -364,13 +355,11 @@ public class OrdersService {
         cartRepository.deleteAll(cartsToRemove);
     }
 
-    // ===== 사용자 관련 헬퍼 메서드 =====
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("해당 userID의 유저 조회를 실패하였습니다."));
     }
 
-    // ===== 주문 관련 헬퍼 메서드 =====
     private Orders createOrderFromSelectedCarts(User user, List<Cart> selectedCarts) {
         // 기존의 CREATED 상태 주문이 있다면 삭제
         ordersRepository.findByUserIdAndOrderStatus(user.getId(), OrderStatus.CREATED)
@@ -424,7 +413,6 @@ public class OrdersService {
         }
     }
 
-    // ===== DTO 변환 헬퍼 메서드 =====
     private OrdersDetailDto convertToOrderResponseDto(Orders savedOrder) {
         return OrdersDetailDto.builder()
                 .orderId(savedOrder.getOrderId())

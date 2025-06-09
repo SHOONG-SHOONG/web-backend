@@ -16,11 +16,7 @@ import shoong.web_backend.domain.user.jwt.JWTUtil;
 import shoong.web_backend.domain.user.service.RefreshTokenService;
 import shoong.web_backend.domain.user.util.CookieUtil;
 
-/**
- * 폼 로그인 성공 후 JWT 발급
- * access -> 헤더
- * refresh -> 쿠키
- */
+// 폼 로그인 성공 -> access 토큰과 refresh 토큰 발급
 @Component // 스프링 빈으로 등록
 @RequiredArgsConstructor
 public class CustomFormSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {

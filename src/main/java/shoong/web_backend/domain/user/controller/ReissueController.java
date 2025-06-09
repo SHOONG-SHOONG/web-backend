@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shoong.web_backend.domain.user.service.ReissueService;
 
-/**
- * refresh 토큰으로 재발급 요청 처리
- * refresh rotate 적용
- */
+// refresh 토큰을 통해 재발급 요청
 @RestController
 @RequiredArgsConstructor
 public class ReissueController {

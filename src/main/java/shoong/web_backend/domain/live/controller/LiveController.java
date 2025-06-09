@@ -7,7 +7,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +40,6 @@ public class LiveController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ) {
         // DTO로 변환
-
         LiveCreateRequestDto requestDto = new LiveCreateRequestDto(title, description,
                 imageFile, LocalDate.now(), LocalDateTime.now(), itemIds, streamKey);
 
@@ -81,13 +79,13 @@ public class LiveController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No live ongoing for this brand");  // 진행 중이지 않음
         }
     }
-    // ✅ 방송 제목으로 스트림 키 조회
+    // 방송 제목으로 스트림 키 조회
     @GetMapping("/stream-key/search")
     public ResponseEntity<String> getStreamKeyByTitle(@RequestParam("title") String title) {
         String streamKey = liveService.searchStreamKeyByTitle(title);
         return ResponseEntity.ok(streamKey);
     }
-    // ✅ 최신 방송 스트림 키 조회
+    // 최신 방송 스트림 키 조회
     @GetMapping("/stream-key/latest")
     public ResponseEntity<String> getLatestStreamKey() {
         String streamKey = liveService.getLatestStreamKey();

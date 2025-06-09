@@ -96,7 +96,6 @@ public class ItemService {
         itemRepository.save(item);
     }
 
-    // ===== 사용자 관련 헬퍼 메서드 =====
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("유저 조회 실패"));
@@ -109,13 +108,11 @@ public class ItemService {
         }
     }
 
-    // ===== 브랜드 관련 헬퍼 메서드 =====
     private Brand findBrandByUser(User user) {
         return Optional.ofNullable(user.getBrand())
                 .orElseThrow(() -> new NotFoundException("브랜드 조회 실패"));
     }
 
-    // ===== 아이템 관련 헬퍼 메서드 =====
     private Item findItemById(Long itemId) {
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("해당 상품이 존재하지 않습니다."));
@@ -137,16 +134,12 @@ public class ItemService {
     }
 
     private void saveItemWithImages(Item item, MultipartFile[] imageFiles) {
-        // 먼저 item을 저장 (ID 생성을 위해)
         itemRepository.save(item);
 
-        // 이미지 처리 및 반환
         List<ItemImage> savedImages = itemImageService.saveMultiImagesAndReturnList(imageFiles, item);
 
-        // 저장된 이미지들을 item의 itemImages 컬렉션에 추가
         item.getItemImages().addAll(savedImages);
 
-        // 변경사항 저장
         itemRepository.save(item);
     }
 
@@ -188,9 +181,7 @@ public class ItemService {
                 .brandId(item.getBrand().getBrandId())
                 .itemName(item.getItemName())
                 .price(item.getPrice())
-                // 30%와 같이 처리를 위해 0.3이라면 30퍼센트의 할인율을 갖추게함.
                 .discountRate(item.getDiscountRate() * 100)
-                // finalPrice -> 할인 적용된 최종 가격, 소수점 이하는 제거
                 .finalPrice(calculateFinalPrice(item))
                 .wishlistCount(item.getWishlists().size())
                 .description(item.getDescription())
@@ -203,125 +194,6 @@ public class ItemService {
     }
 
     private int calculateFinalPrice(Item item) {
-        // 1.0 - 0.3(할인율) -> 0.7 * 가격
         return (int) Math.round(item.getPrice() * (1.0 - item.getDiscountRate()));
     }
 }
-
-//@Service
-//@RequiredArgsConstructor
-//public class ItemService {
-//
-//    private final ItemRepository itemRepository;
-//    private final BrandRepository brandRepository;
-//    private final UserRepository userRepository;
-//    private final ItemImageService itemImageService;
-//    // 아이템을 생성할 때 아이템 이미지도 함께 저장
-//    @Transactional
-//    public void createItem(ItemRequestDto dto, Long userId, MultipartFile[] imageFiles) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("유저 조회 실패"));
-//
-//        Brand brand = Optional.ofNullable(user.getBrand())
-//                .orElseThrow(() -> new RuntimeException("브랜드 조회 실패"));
-//
-//        Item item = Item.builder()
-//                .brand(brand)
-//                .itemName(dto.getItemName())
-//                .price(dto.getPrice())
-//                .discountRate(dto.getDiscountRate())
-//                .description(dto.getDescription())
-//                .itemQuantity(dto.getItemQuantity())
-//                .category(dto.getCategory())
-//                .createdAt(dto.getCreatedAt())
-//                .discountExpiredAt(dto.getDiscountExpiredAt())
-//                .status(ItemStatus.ON_SALE)
-//                .build();
-//
-//        // 먼저 item을 저장 (ID 생성을 위해)
-//        itemRepository.save(item);
-//
-//        // 이미지 처리 및 item.itemImages 컬렉션 업데이트
-//        List<ItemImage> savedImages = itemImageService.saveMultiImagesAndReturnList(imageFiles, item);
-//
-//        // 저장된 이미지들을 item의 itemImages 컬렉션에 추가
-//        // (ItemImageService에서 이미 설정했다면 이 단계는 생략 가능)
-//        item.getItemImages().addAll(savedImages);
-//
-//        // 변경사항 저장 (트랜잭션 내에서 자동으로 반영되지만, 명시적으로 호출)
-//        itemRepository.save(item);
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public ItemResponseDto getItem(Long itemId){
-//        Item item = itemRepository.findById(itemId)
-//                .orElseThrow(() -> new RuntimeException("상품 조회 실패"));
-//        ItemResponseDto itemResponseDto = ItemResponseDto.builder()
-//                .itemId(item.getItemId())
-//                .brandId(item.getBrand().getBrandId())
-//                .itemName(item.getItemName())
-//                .price(item.getPrice())
-//                // 30%와 같이 처리를 위해 0.3이라면 30퍼센트의 할인율을 갖추게함.
-//                .discountRate(item.getDiscountRate() * 100)
-//                // finalPrice -> 할인 적용된 최종 가격
-//                // 소수점 이하는 제거
-//                // 1.0 - 0.3(할인율) -> 0.7 * 가격
-//                .finalPrice((int) Math.floor(item.getPrice() * (1.0 - item.getDiscountRate())))
-//                .wishlistCount(item.getWishlists().size())
-//                .description(item.getDescription())
-//                .itemQuantity(item.getItemQuantity())
-//                .category(item.getCategory())
-//                .discountExpiredAt(item.getDiscountExpiredAt())
-//                .status(item.getStatus()) // Enum 값을 사용
-//                .itemImages(item.getItemImages())
-//                .build();
-//        return itemResponseDto;
-//    }
-//
-//    // 동적 쿼리 부분
-//    @Transactional(readOnly = true)
-//    public Page<ItemResponseDto> searchItems(ItemSearchCondition condition, Pageable pageable) {
-//        return itemRepository.searchItems(condition, pageable);
-//    }
-//
-//    @Transactional
-//    public void deleteItem(Long itemId) {
-//        Item item = itemRepository.findById(itemId)
-//                        .orElseThrow(() -> new RuntimeException("상품 조회 실패"));
-//
-//        if (item.getStatus() == ItemStatus.DELETED){
-//            throw new RuntimeException("이미 삭제된 상품입니다."); // 재삭제 방지
-//        }
-//
-//        item.setStatus(ItemStatus.DELETED);
-//    }
-//    @Transactional
-//    public void updateItem(Long itemId, @Valid ItemUpdateRequestDto updateDto, Long userId) {
-//        Item item = itemRepository.findById(itemId)
-//                .orElseThrow(() -> new NotFoundException("해당 상품이 존재하지 않습니다."));
-//        User user = userRepository.findById(userId).orElseThrow(()->new NotFoundException("유저 조회 실패"));
-//
-//        if(user.getRole().equals(UserRole.CLIENT)){
-//            throw new AuthorizationDeniedException("권한이 없는 유저(클라이언트)로부터의 상품 업데이트 요청");
-//        }
-//        if(updateDto.getItemName() != null){
-//            item.setItemName(updateDto.getItemName());
-//        }
-//        if(updateDto.getPrice() != null){
-//            item.setPrice(updateDto.getPrice());
-//        }
-//        if(updateDto.getDiscountRate() != null){
-//            item.setDiscountRate(updateDto.getDiscountRate());
-//        }
-//        if(updateDto.getDescription() != null){
-//            item.setDescription(updateDto.getDescription());
-//        }
-//        if(updateDto.getItemQuantity() != null){
-//            item.setItemQuantity(updateDto.getItemQuantity());
-//        }
-//        if(updateDto.getCategory() != null){
-//            item.setCategory(updateDto.getCategory());
-//        }
-//        itemRepository.save(item);
-//    }
-//}

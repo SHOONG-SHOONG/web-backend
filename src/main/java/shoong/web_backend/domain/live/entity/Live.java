@@ -1,6 +1,5 @@
 package shoong.web_backend.domain.live.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import shoong.web_backend.domain.live.enums.LiveStatus;
@@ -28,7 +27,7 @@ public class Live {
     private String description;
 
     private String imageUrl;
-    // OBS에서 등록하는 스트림 키(브랜드명)
+    // OBS에서 등록하는 스트림 키
     private String streamKey;
 
     private LocalDate liveDate;

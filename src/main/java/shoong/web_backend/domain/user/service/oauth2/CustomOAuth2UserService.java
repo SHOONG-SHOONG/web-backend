@@ -26,13 +26,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Transactional
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // userRequest -> registration 정보
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         OAuth2Response response = null;
 
-        // 존재하는 provider 인지 확인
         if (registrationId.equals("kakao")) {
             response = new KakaoResponse(oAuth2User.getAttributes());
         }
@@ -45,10 +43,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String role = String.valueOf(UserRole.CLIENT);
         System.out.println("식별자 생성 loadUser 실행" + username);
 
-        // DB save
+        // DB에 저장
         saveUser(response, username, role);
 
-        // Entity 목적 순수하게 유지하기 위해서 dto 로 전달..
         OAuth2UserDto oAuth2UserDto = OAuth2UserDto.builder()
                 .username(username)
                 .name(response.getName())
@@ -58,14 +55,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         customOAuth2User = new CustomOAuth2User(oAuth2UserDto);
 
-        // 서버 내부에서 사용하기 위한 인증 정보
         return customOAuth2User;
     }
 
-    /**
-     * 이미 존재하는 경우 update
-     * 존재하지 않는 경우 save
-     */
+    // 업데이트
     private void saveUser(OAuth2Response oAuth2Response, String username, String role) {
         // DB 조회
         User isExist = userRepository.findByUserEmail(oAuth2Response.getEmail());

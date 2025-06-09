@@ -3,8 +3,6 @@ package shoong.web_backend.domain.user.handler;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,18 +11,12 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.filter.OncePerRequestFilter;
 import shoong.web_backend.domain.user.jwt.JWTUtil;
 import shoong.web_backend.domain.user.repository.RefreshRepository;
-import shoong.web_backend.domain.user.repository.UserRepository;
-import shoong.web_backend.domain.user.util.CookieUtil;
 
-/**
- * 로그아웃 필터
- * refresh 토큰 만료
- */
-@Component // 스프링 빈으로 등록
+// 로그아웃 필터 -> 리프레쉬 토큰 만료
+@Component
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends OncePerRequestFilter {
 
@@ -35,7 +27,7 @@ public class CustomLogoutFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String requestUri = request.getRequestURI();
-        // 로그아웃 요청 경로인지 확인
+        // 로그아웃 요청 경로 확인
         if (!requestUri.matches("^\\/logout$")) { // "/logout" 경로에 대해서만 동작하도록
             filterChain.doFilter(request, response);
             return;
@@ -48,11 +40,9 @@ public class CustomLogoutFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 여기서부터 Refresh 토큰 처리
+        // Refresh 토큰 처리
         String refresh = null;
         Cookie[] cookies = request.getCookies();
-
-        // --- 이 부분이 핵심 수정 사항 ---
         // cookies 배열이 null이 아닌지 확인
         if (cookies != null) {
             Optional<Cookie> refreshCookie = Arrays.stream(cookies)
@@ -62,12 +52,11 @@ public class CustomLogoutFilter extends OncePerRequestFilter {
                 refresh = refreshCookie.get().getValue();
             }
         }
-        // --- 여기까지 ---
 
-        // refresh 토큰이 없는 경우 (쿠키에 없거나, null 체크 후에도 null인 경우)
+        // refresh 토큰이 없는 경우 (쿠키에 없거나, null 체크 후에도 null일떄)
         if (refresh == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400 Bad Request
-            response.getWriter().write("refresh token is null"); // 적절한 에러 메시지 반환
+            response.getWriter().write("refresh token is null");
             return;
         }
 
@@ -98,6 +87,6 @@ public class CustomLogoutFilter extends OncePerRequestFilter {
         refreshRepository.deleteByRefresh(refresh);
 
         response.setStatus(HttpServletResponse.SC_OK); // 200 OK
-        response.getWriter().write("logout success"); // 성공 메시지
+        response.getWriter().write("logout success");
     }
 }

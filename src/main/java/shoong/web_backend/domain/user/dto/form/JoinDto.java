@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,7 +38,6 @@ public class JoinDto {
     private String userAlias;
 
     private String registrationNumber;
-    // 주소는 필수 X
     private String userAddress;
 
     public JoinDto(String userEmail, String userPassword, String name,String userName, String userPhone,

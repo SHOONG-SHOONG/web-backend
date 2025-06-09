@@ -31,8 +31,8 @@ public class BrandService {
             throw new IllegalStateException("해당 유저는 스트리머 권한이 없습니다.");
         }
 
-        // 기본 이미지 URL (이미지가 없을 경우를 대비)
-        String imageUrl = "https://기본이미지URL.jpg"; // 필요시 기본 이미지 URL 설정
+        // 테스트 용 이미지
+        String imageUrl = "https://기본이미지URL.jpg";
 
         MultipartFile imageFile = brandRequestDto.getImageFile();
 

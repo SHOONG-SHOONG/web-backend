@@ -26,8 +26,6 @@ public class JoinService {
             return;
         }
         // 유저 별명
-        // 1. 비어있을 경우 : NickNameGenerator
-        // 2. 비어있지 않을 경우 : 유저가 선택한 별명으로 추가
         String aliasToSet = Optional.ofNullable(joinDto.getUserAlias())
                 .filter(alias -> !alias.isBlank())
                 .orElseGet(NickNameGenerator::getRandomNickname);
@@ -45,8 +43,8 @@ public class JoinService {
                     .birthDay(joinDto.getBirthDay())
                     .registrationNumber(joinDto.getRegistrationNumber())
                     .userAddress(joinDto.getUserAddress())
-                    .role(UserRole.CLIENT)  // 기본값 USER, 필요시 ADMIN도 가능
-                    .userStatus(UserStatus.ACTIVE)  // 기본값 ACTIVE로 가정
+                    .role(UserRole.CLIENT)
+                    .userStatus(UserStatus.ACTIVE)
                     .userAlias(aliasToSet)
                     .build();
             userRepository.save(userEntity);
@@ -62,8 +60,8 @@ public class JoinService {
                     .birthDay(joinDto.getBirthDay())
                     .registrationNumber(joinDto.getRegistrationNumber())
                     .userAddress(joinDto.getUserAddress())
-                    .role(UserRole.STREAMER)  // 기본값 USER, 필요시 ADMIN도 가능
-                    .userStatus(UserStatus.PENDING)  // 기본값 PENDING 으로 지정 , 승인 대기
+                    .role(UserRole.STREAMER)
+                    .userStatus(UserStatus.PENDING)
                     .userAlias(aliasToSet)
                     .build();
 

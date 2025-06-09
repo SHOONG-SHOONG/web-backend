@@ -6,10 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 import shoong.web_backend.domain.user.util.CookieUtil;
 
-/**
- * OAuth2 리다이렉트 문제로 access 토큰을 httpOnly 쿠키로 발급
- * -> 프론트에서 바로 재요청하면 해당 access 토큰 헤더에 싣고, 쿠키는 만료시킴
- */
 @Service
 public class OAuth2JwtHeaderService {
     public String oauth2JwtHeaderSet(HttpServletRequest request, HttpServletResponse response) {

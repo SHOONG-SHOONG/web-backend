@@ -2,7 +2,6 @@ package shoong.web_backend.domain.orders.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import shoong.web_backend.domain.item.enums.ItemStatus;
 import shoong.web_backend.domain.order_item.entity.OrderItem;
 import shoong.web_backend.domain.orders.enums.OrderStatus;
 import shoong.web_backend.domain.user.entity.User;
@@ -32,7 +31,6 @@ public class Orders {
 
     private String orderAddress;
 
-    // Orders -> OrderItem (1:N)
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
@@ -54,7 +52,6 @@ public class Orders {
                 .build();
     }
 
-    // 편의 메소드
     public void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);
         orderItem.setOrder(this);

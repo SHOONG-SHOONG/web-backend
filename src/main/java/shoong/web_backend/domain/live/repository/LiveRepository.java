@@ -19,7 +19,7 @@ public interface LiveRepository extends JpaRepository<Live, Long> {
     Optional<Live> findFirstByLiveStatusAndLiveStartTimeAfterOrderByLiveStartTimeAsc(
             LiveStatus status, LocalDateTime now);
 
-    // 종료된 라이브 N개 조회 (가장 최근에 종료된 순으로)
+    // 종료된 라이브 N개 조회(최근 종료된 순서대로)
     @Query("SELECT l FROM Live l WHERE l.liveStatus = :status ORDER BY l.liveEndTime DESC")
     List<Live> findTopNByLiveStatusOrderByLiveEndTimeDesc(LiveStatus status, Pageable pageable);
 
@@ -30,10 +30,10 @@ public interface LiveRepository extends JpaRepository<Live, Long> {
     List<Live> findAllByLiveDateOrderByLiveStartTimeAsc(LocalDate liveDate);
 
     Optional<Live> findFirstByUserIdAndLiveStatus(Long userId, LiveStatus status);
-    // 제목 + 최신
+    // 제목 + 최신 목록
     Optional<Live> findFirstByTitleContainingIgnoreCaseOrderByLiveDateDesc(String title);
 
-    // 제목없이 최신
+    // 제목없이 최신 목록
     Optional<Live> findFirstByOrderByLiveStartTimeDesc();
 
     List<Live> findAllByUserIdOrderByLiveStartTimeDesc(Long userId);

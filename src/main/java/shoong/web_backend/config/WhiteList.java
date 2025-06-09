@@ -7,9 +7,9 @@ public class WhiteList {
             "/live/main", "/live/scheduled", "/live/brand/live-onGoing",
             "/live/stream-key/search", "/live/stream-key/latest",
             "/item/search",
-            "/item/summary/**", // <-- 여기에 슬래시 추가됨
+            "/item/summary/**",
             "/brand/list",
-            "/brand/summary/**", // <-- 여기에 슬래시 추가됨
+            "/brand/summary/**",
             "/live/vods",
             "/live/list",
             "/actuator/health",

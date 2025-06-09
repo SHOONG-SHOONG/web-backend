@@ -31,7 +31,7 @@ public class SuperAdminService {
                 .collect(Collectors.toList());
     }
 
-    // 스트리머 승인
+    // 스트리머에 대한 승인
     public void approveStreamer(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));

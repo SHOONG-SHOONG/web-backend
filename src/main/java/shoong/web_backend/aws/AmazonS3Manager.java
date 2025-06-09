@@ -57,7 +57,7 @@ public class AmazonS3Manager {
                 key);
         return endpoint;
 
-        // 또는 서명된 URL이 필요한 경우 아래 코드 사용
+        // 서명된 URL
         /*
         GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofDays(7)) // URL의 만료 기간 설정
