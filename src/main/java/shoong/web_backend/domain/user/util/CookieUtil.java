@@ -5,7 +5,7 @@ import jakarta.servlet.http.Cookie;
 public class CookieUtil {
     public static Cookie createCookie(String key, String value, Integer expiredS) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setHttpOnly(false);
+        cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(expiredS);
